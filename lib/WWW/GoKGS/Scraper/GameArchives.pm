@@ -60,37 +60,34 @@ sub date_filter {
     $self->{date_filter} ||= sub { $_[0] };
 }
 
+sub result_filter {
+    my $self = shift;
+    $self->{result_filter} = shift if @_;
+    $self->{result_filter} ||= sub { $_[0] };
+}
+
 sub scrape {
     my ( $self, @args ) = @_;
     my $result = $self->SUPER::scrape( @args );
 
-    %$result = (
-        games    => [],
-        zip_uri  => undef,
-        tgz_uri  => undef,
-        calendar => [],
-        %$result,
-    );
-
-    return $result unless @{$result->{calendar}};
+    return $result unless $result->{calendar};
 
     my @calendar;
     for my $calendar ( @{$result->{calendar}} ) {
         for my $month ( @{$calendar->{month}} ) {
-            $month->{year} = $calendar->{year};
-            $month->{uri}  = undef unless exists $month->{uri};
+            $month->{year} = int $calendar->{year};
             push @calendar, $month;
         }
     }
 
     if ( @calendar == 1 and $calendar[0]{year} == 1970 ) { # KGS's bug
-        @{$result->{calendar}} = ();
+        delete $result->{calendar};
     }
     else {
-        @{$result->{calendar}} = @calendar;
+        $result->{calendar} = \@calendar;
     }
 
-    return $result unless @{$result->{games}};
+    return $result unless $result->{games};
 
     my $date_filter = do {
         my $orig = $self->date_filter;
@@ -107,13 +104,30 @@ sub scrape {
         };
     };
 
+    my $result_filter = do {
+        my $orig = $self->result_filter;
+        
+        # use SGF-compatible format whenever possible
+        my %canonical = (
+            'W+Res.'  => 'W+Resign',
+            'B+Res.'  => 'B+Resign',
+            'W+Forf.' => 'W+Forfeit',
+            'B+Forf.' => 'B+Forfeit',
+            'Jigo'    => 'Draw',
+        );
+
+        sub {
+            my $r = shift;
+            $orig->( $canonical{$r} || $r );
+        };
+    };
+
     for my $game ( @{$result->{games}} ) {
         next if exists $game->{black};
+
         my $users = $game->{white}; # <td colspan="2">
         if ( @$users == 1 ) { # Type: Demonstration
             $game->{owner} = $users->[0];
-            $game->{white} = [];
-            $game->{black} = [];
         }
         elsif ( @$users == 3 ) { # Type: Review
             $game->{owner} = $users->[0];
@@ -128,6 +142,7 @@ sub scrape {
         else {
             die 'Oops! Something went wrong';
         }
+
         $game->{tag}        = $game->{result} if exists $game->{result};
         $game->{result}     = $game->{type};
         $game->{type}       = $game->{start_time};
@@ -135,13 +150,20 @@ sub scrape {
         $game->{setup}      = $game->{maybe_setup};
     }
     continue {
-        $game->{sgf_uri}    = undef unless exists $game->{sgf_uri};
-        $game->{tag}        = undef unless exists $game->{tag};
-        $game->{owner}      = {} unless exists $game->{owner};
         $game->{start_time} = $date_filter->( $game->{start_time} );
+        $game->{result}     = $result_filter->( $game->{result} );
         $game->{setup}      =~ /^(\d+)\x{d7}\d+ (?:H(\d+))?$/;
-        $game->{board_size} = $1;
-        $game->{handicap}   = $2;
+        $game->{board_size} = int $1;
+        $game->{handicap}   = int $2 if $2;
+
+        for my $user (
+            $game->{owner} || (),
+            @{ $game->{black} || [] },
+            @{ $game->{white} || [] },
+        ) {
+            delete $user->{rank} unless $user->{rank};
+        }
+
         delete $game->{setup};
         delete $game->{maybe_setup};
     }
@@ -155,7 +177,7 @@ __END__
 
 =head1 NAME
 
-WWW::GoKGS::Scraper::GameArchives - KGS Game Archives Scraper
+WWW::GoKGS::Scraper::GameArchives - KGS Game Archives
 
 =head1 SYNOPSIS
 
@@ -219,6 +241,26 @@ The return value is used as the filtered value.
   $game_archives->date_filter(sub {
       my $date = shift; # => "2014-05-17T19:05Z"
       gmtime->strptime( $date, '%Y-%m-%dT%H:%MZ' );
+  });
+
+=item $CodeRef = $game_archives->result_filter
+
+=item $game_archives->result_filter( sub { my $result = shift; ... } )
+
+Can be used to get or set a game result filter. Defaults to an anonymous subref
+which just returns the given argument (C<sub { $_[0] }>). The callback is
+called with a game result string such as C<B+Resign>.
+The return value is used as the filtered value.
+
+  $game_archives->result_filter(sub {
+      my $result = shift;
+
+      # I prefer "B+R" to "B+Resign", 
+      # while both of them are valid SGF-compatible format
+      return 'B+R' if $result eq 'B+Resign';
+      ...
+
+      $result;
   });
 
 =back

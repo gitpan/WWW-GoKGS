@@ -56,7 +56,7 @@ __END__
 
 =head1 NAME
 
-WWW::GoKGS::Scraper - Abstract base class for scrapers
+WWW::GoKGS::Scraper - Abstract base class for KGS scrapers
 
 =head1 SYNOPSIS
 
@@ -82,8 +82,8 @@ This class is an abstract base class for KGS scrapers.
 KGS scrapers must inherit from this class, and also implement two methods;
 C<_build_base_uri> and C<_build_scraper>. C<_build_base_uri> must return
 a L<URI> object which represents a resource on KGS.
-C<_build_scraper> must return an L<Web::Scraper> object which is used to parse
-the resource.
+C<_build_scraper> must return an L<Web::Scraper> object which can C<scrape>
+the resource. Both of them are called as a method on the object.
 
 =head2 ATTRIBUTES
 

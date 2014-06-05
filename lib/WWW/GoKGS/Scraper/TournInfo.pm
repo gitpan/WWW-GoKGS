@@ -37,13 +37,6 @@ sub scrape {
     my ( $self, @args ) = @_;
     my $result = $self->SUPER::scrape( @args );
 
-    %$result = (
-        name        => undef,
-        description => undef,
-        links       => {},
-        %$result,
-    );
-
     return $result unless $result->{description};
 
     $result->{description} = $self->html_filter->(do {

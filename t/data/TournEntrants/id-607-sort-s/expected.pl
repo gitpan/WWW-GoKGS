@@ -3,42 +3,30 @@
     {
       'name' => 'pachi2',
       'notes' => 'Winner',
-      'position' => '1',
+      'position' => 1,
       'rank' => '-',
-      'score' => '2',
-      'sodos' => undef,
-      'sos' => undef,
-      'standing' => undef
+      'score' => 2
     },
     {
       'name' => 'Zen19S',
       'notes' => 'Winner',
-      'position' => '1',
+      'position' => 1,
       'rank' => '4d',
-      'score' => '2',
-      'sodos' => undef,
-      'sos' => undef,
-      'standing' => undef
+      'score' => 2
     },
     {
       'name' => 'ManyFaces1',
       'notes' => '',
-      'position' => '3',
+      'position' => 3,
       'rank' => '2d',
-      'score' => '1',
-      'sodos' => undef,
-      'sos' => undef,
-      'standing' => undef
+      'score' => 1
     },
     {
       'name' => 'mogobot5',
       'notes' => '',
-      'position' => '3',
+      'position' => 3,
       'rank' => '-',
-      'score' => '1',
-      'sodos' => undef,
-      'sos' => undef,
-      'standing' => undef
+      'score' => 1
     }
   ],
   'links' => {
@@ -55,19 +43,19 @@
     'rounds' => [
       {
         'end_time' => '2011-07-31T08:35Z',
-        'round' => '1',
+        'round' => 1,
         'start_time' => '2011-07-31T07:00Z',
         'uri' => bless( do{\(my $o = 'http://www.gokgs.com/tournGames.jsp?id=607&round=1')}, 'URI::http' )
       },
       {
         'end_time' => '2011-07-31T10:10Z',
-        'round' => '2',
+        'round' => 2,
         'start_time' => '2011-07-31T08:35Z',
         'uri' => bless( do{\(my $o = 'http://www.gokgs.com/tournGames.jsp?id=607&round=2')}, 'URI::http' )
       },
       {
         'end_time' => '2011-07-31T11:45Z',
-        'round' => '3',
+        'round' => 3,
         'start_time' => '2011-07-31T10:10Z',
         'uri' => bless( do{\(my $o = 'http://www.gokgs.com/tournGames.jsp?id=607&round=3')}, 'URI::http' )
       }

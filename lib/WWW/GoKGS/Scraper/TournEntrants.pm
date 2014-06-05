@@ -49,15 +49,7 @@ sub scrape {
     my ( $self, @args ) = @_;
     my $result = $self->SUPER::scrape( @args );
 
-    %$result = (
-        name     => undef,
-        entrants => [],
-        results  => {},
-        links    => {},
-        %$result,
-    );
-
-    return $result unless @{$result->{entrants}};
+    return $result unless $result->{entrants};
 
     if ( !$result->{entrants}->[0] ) { # Round Robin
         shift @{$result->{entrants}};
@@ -68,11 +60,11 @@ sub scrape {
             $entrant->[0] =~ s/\(tie\)$//;
 
             push @entrants, {
-                position => @$entrant == $size ? shift @$entrant : $entrants[-1]{position},
+                position => @$entrant == $size ? int shift @$entrant : $entrants[-1]{position},
                 name     => shift @$entrant,
                 number   => shift @$entrant,
                 notes    => pop @$entrant,
-                score    => pop @$entrant,
+                score    => 0 + pop @$entrant,
                 results  => $entrant,
             };
         }
@@ -90,7 +82,7 @@ sub scrape {
                 next if $b == $a;
                 next unless $b->{number};
                 $results{$a->{name}}{$b->{name}}
-                    = $a->{results}->[$b->{number}-1];
+                    = $a->{results}->[$b->{number}-1] || q{};
             }
         }
 
@@ -114,6 +106,11 @@ sub scrape {
             $entrant->{position} = $preceding->{position};
         }
         continue {
+            $entrant->{position} = int $entrant->{position};
+            $entrant->{sos}      += 0;
+            $entrant->{sodos}    += 0;
+            $entrant->{score}    += 0;
+
             $preceding = $entrant;
         }
     }
@@ -121,17 +118,7 @@ sub scrape {
     }
 
     for my $entrant ( @{$result->{entrants}} ) {
-        %$entrant = (
-            name     => undef,
-            rank     => undef,
-            position => undef,
-            standing => undef,
-            notes    => undef,
-            score    => undef,
-            sos      => undef,
-            sodos    => undef,
-            %$entrant,
-        );
+        delete $entrant->{rank} unless $entrant->{rank};
     }
 
     $result;

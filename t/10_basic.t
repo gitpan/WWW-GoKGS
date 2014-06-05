@@ -15,6 +15,8 @@ subtest 'WWW::GoKGS::Scraper::GameArchives' => sub {
     isa_ok $game_archives, 'WWW::GoKGS::Scraper::GameArchives';
     is $game_archives->base_uri, 'http://www.gokgs.com/gameArchives.jsp';
     isa_ok $game_archives->user_agent, 'LWP::UserAgent';
+    isa_ok $game_archives->date_filter, 'CODE';
+    isa_ok $game_archives->result_filter, 'CODE';
     can_ok $game_archives, qw( scrape query );
 };
 
@@ -69,6 +71,7 @@ subtest 'WWW::GoKGS' => sub {
     isa_ok $gokgs->user_agent, 'LWP::UserAgent';
     isa_ok $gokgs->date_filter, 'CODE';
     isa_ok $gokgs->html_filter, 'CODE';
+    isa_ok $gokgs->result_filter, 'CODE';
     isa_ok $gokgs->game_archives, 'WWW::GoKGS::Scraper::GameArchives';
     isa_ok $gokgs->top_100, 'WWW::GoKGS::Scraper::Top100';
     isa_ok $gokgs->tourn_list, 'WWW::GoKGS::Scraper::TournList';
@@ -78,6 +81,6 @@ subtest 'WWW::GoKGS' => sub {
     can_ok $gokgs, qw( scrape );
 
     throws_ok {
-        $gokgs->scrape('fooBar.jsp');
-    } qr{^Don't know how to scrape 'fooBar\.jsp'};
+        $gokgs->scrape('/fooBar.jsp');
+    } qr{^Don't know how to scrape '/fooBar\.jsp'};
 };
