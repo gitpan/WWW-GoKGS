@@ -12,7 +12,7 @@ use WWW::GoKGS::Scraper::TournGames;
 use WWW::GoKGS::Scraper::TournInfo;
 use WWW::GoKGS::Scraper::TournList;
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 sub new {
     my $class = shift;
@@ -237,12 +237,11 @@ the filtered value. This attribute is read-only.
 
 =item $CodeRef = $gokgs->result_filter
 
-=item $gokgs->result_filter( sub { my $result = shift; ... } )
-
 Can be used to get or set a game result filter. Defaults to an anonymous subref
 which just returns the given argument (C<sub { $_[0] }>). The callback is
 called with a game result string such as C<B+Resign>.
 The return value is used as the filtered value.
+This attribute is read-only.
 
   my $gokgs = WWW::GoKGS->new(
       result_filter => sub {

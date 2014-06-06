@@ -89,7 +89,7 @@ sub scrape {
         delete @{$_}{qw/number results/} for @entrants;
 
         $result->{entrants} = \@entrants;
-        $result->{results}  = \%results;
+        $result->{results}  = \%results if %results;
     }
     elsif ( exists $result->{entrants}->[0]->{score} ) { # Swiss, McMahon
         my $preceding;
@@ -140,25 +140,44 @@ WWW::GoKGS::Scraper::TournEntrants - KGS Tournament Entrants
 
   my $result = $tourn_entrants->query(
       id   => 762,
-      sort => 's',
+      sort => 's'
   );
   # => {
   #     name => 'KGS Meijin Qualifier October 2012',
   #     entrants => [
   #         {
-  #             name => 'foo',
-  #             rank => '2k',
-  #             standing => 'Winner',
-  #             ...
+  #             name     => 'foo',
+  #             rank     => '5d',
+  #             standing => 'Winner'
   #         },
   #         ...
   #     ],
   #     links => {
-  #        ...
-  #     },
+  #         entrants => [
+  #             {
+  #                 sort_by => 'name',
+  #                 uri     => '/tournEntrants.jsp?id=762&sort=n'
+  #             },
+  #             {
+  #                 sort_by => 'result',
+  #                 uri     => '/tournEntrants.jsp?id=762&sort=s'
+  #             }
+  #         ],
+  #         rounds => [
+  #             {
+  #                 round      => 1,
+  #                 start_time => '2012-10-27T16:05Z',
+  #                 end_time   => '2012-10-27T18:05Z',
+  #                 uri        => '/tournGames.jsp?id=762&round=1',
+  #             },
+  #             ...
+  #         ]
+  #     }
   # }
 
 =head1 DESCRIPTION
+
+This class inherits from L<WWW::GoKGS::Scraper>.
 
 =head2 ATTRIBUTES
 
@@ -183,9 +202,90 @@ shared by L<Web::Scraper> users (C<$Web::Scraper::UserAgent>).
 
 =over 4
 
-=item $tourn_entrants->scrape
+=item $HashRef = $tourn_entrants->query( id => $tourn_id, sort => 's' )
 
-=item $tourn_entrants->query
+=item $HashRef = $tourn_entrants->query( id => $tourn_id, sort => 'n' )
+
+Given key-value pairs of query parameters, returns a hash reference
+which represents the tournament entrants.
+The hashref is formatted as follows:
+
+=over 4
+
+=item Single or Double Elimination tournaments
+
+  {
+      name => 'KGS Meijin Qualifier October 2012',
+      entrants => [
+          {
+              name     => 'foo',
+              rank     => '5d',
+              standing => 'Winner'
+          },
+          ...
+      ],
+      links => {
+         ...
+      }
+  }
+
+=item Swiss or McMahon tournaments
+
+  {
+      name => 'June 2014 KGS bot tournament',
+      entrants => [
+          {
+              position => 1,
+              name     => 'Zen19S',
+              rank     => '-',
+              score    => 29,
+              sos      => 678.5, # Sum of Opponents' Scores
+              sodos    => 514,   # Sum Of Defeated Opponents' Scores
+              notes    => 'Winner'
+          },
+          ...
+      ],
+      links => {
+          ...
+      }
+  }
+
+=item Round Robin tournaments
+
+  {
+      name => 'EGC 2011 19x19 Computer Go',
+      entrants => [
+          {
+              position => 1,
+              name     => 'pachi2',
+              rank     => '-',
+              score    => 2,
+              notes    => 'Winner'
+          },
+          ...
+      ],
+      results => {
+          'pachi2' => {
+              'Zen19S'     => '0/1',
+              'ManyFaces1' => '1/1',
+              'mogobot5'   => '1/1'
+          },
+          ...
+      },
+      links => {
+         ...
+      }
+  }
+
+=back
+
+=item $HashRef = $tourn_entrants->scrape( URI->new(...) )
+
+=item $HashRef = $tourn_entrants->scrape( HTTP::Response->new(...) )
+
+=item $HashRef = $tourn_entrants->scrape( $html[, $base_uri] )
+
+=item $HashRef = $tourn_entrants->scrape( \$html[, $base_uri] )
 
 =back
 

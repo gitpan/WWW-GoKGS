@@ -72,7 +72,7 @@ sub scrape {
     my ( @games, @byes );
     for my $game ( @{$result->{games}} ) {
         my $maybe_bye = delete $game->{maybe_bye};
-        if ( $maybe_bye =~ /^Bye(?: \([^)]+\))?$/ ) {
+        if ( $maybe_bye =~ /^Bye(?: \(([^\)]+)\))?$/ ) {
             push @byes, {
                 type => $1 || 'System',
                 %{$game->{white}},
@@ -110,8 +110,10 @@ sub scrape {
         delete $game->{setup};
     }
 
-    $result->{byes}  = \@byes;
-    $result->{games} = \@games;
+    delete $result->{games};
+
+    $result->{byes} = \@byes if @byes;
+    $result->{games} = \@games if @games;
 
     $result;
 }
@@ -132,43 +134,49 @@ WWW::GoKGS::Scraper::TournGames - Games of the KGS tournament
 
   my $result = $tourn_games->query(
       id    => 762,
-      round => 1,
+      round => 1
   );
   # => {
   #     name => 'KGS Meijin Qualifier October 2012',
-  #     round => '1',
+  #     round => 1,
   #     games => [
   #         {
   #             sgf_uri => 'http://files.gokgs.com/.../foo-bar.sgf',
-  #             board_size => 19,
   #             white => {
   #                 name => 'foo',
-  #                 rank => '2k',
-  #             ],
+  #                 rank => '3d',
+  #             },
   #             black => {
   #                 name => 'bar',
-  #                 rank => '2k',
+  #                 rank => '1d',
   #             },
+  #             board_size => 19,
+  #             start_time => '2012-10-27T16:05Z',
+  #             result => 'W+Resign'
   #         },
+  #         ...
   #     ],
   #     links => {
   #         entrants => [
   #             {
   #                 sort_by => 'name',
-  #                 uri     => 'http://www.gokgs.com/tournEntrants.jsp?id=762&sort=n',
+  #                 uri     => '/tournEntrants.jsp?id=762&sort=n'
   #             },
-  #             ...
+  #             {
+  #                 sort_by => 'result',
+  #                 uri     => '/tournEntrants.jsp?id=762&sort=s'
+  #             }
   #         ],
   #         rounds => [
   #             {
   #                 round      => 1,
-  #                 start_time => '10/27/12 4:05 PM',
-  #                 end_time   => '10/27/12 6:35 PM',
-  #                 uri        => 'http://www.gokgs.com/tournGames.jsp?id=762&round=1',
+  #                 start_time => '2012-10-27T16:05Z',
+  #                 end_time   => '2012-10-27T18:35Z',
+  #                 uri        => '/tournGames.jsp?id=762&round=1',
   #             },
   #             ...
-  #         ],
-  #     },
+  #         ]
+  #     }
   # }
 
 =head1 DESCRIPTION
@@ -234,9 +242,15 @@ The return value is used as the filtered value.
 
 =over 4
 
-=item $tourn_games->scrape
+=item $HashRef = $tourn_games->scrape( URI->new(...) )
 
-=item $tourn_games->query
+=item $HashRef = $tourn_games->scrape( HTTP::Response->new(...) )
+
+=item $HashRef = $tourn_games->scrape( $html[, $base_uri] )
+
+=item $HashRef = $tourn_games->scrape( \$html[, $base_uri] )
+
+=item $HashRef = $tourn_games->query( id => $tourn_id, round => $round_nbr )
 
 =back
 

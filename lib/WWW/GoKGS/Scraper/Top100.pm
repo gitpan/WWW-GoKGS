@@ -74,23 +74,31 @@ The hashref is formatted as follows:
               position => 1,
               name     => 'foo',
               rank     => '9d',
-              uri      => 'http://www.gokgs.com/graphPage.jsp?user=foo',
+              uri      => '/graphPage.jsp?user=foo'
           },
           {
               position => 2,
               name     => 'bar',
               rank     => '9d',
-              uri      => 'http://www.gokgs.com/graphPage.jsp?user=bar',
+              uri      => '/graphPage.jsp?user=bar'
           },
           ...
           {
               position => 100,
               name     => 'baz',
               rank     => '6d',
-              uri      => 'http://www.gokgs.com/graphPage.jsp?user=baz',
+              uri      => '/graphPage.jsp?user=baz'
           }
       ]
   }
+
+=item $HashRef = $top_100->scrape( URI->new(...) )
+
+=item $HashRef = $top_100->scrape( HTTP::Response->new(...) )
+
+=item $HashRef = $top_100->scrape( $html[, $base_uri] )
+
+=item $HashRef = $top_100->scrape( \$html[, $base_uri] )
 
 =back
 

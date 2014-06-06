@@ -61,7 +61,7 @@ WWW::GoKGS::Scraper::TournInfo - Information for the KGS tournament
   my $tourn_info = WWW::GoKGS::Scraper::TournInfo->new;
 
   my $result = $tourn_info->query(
-      id => 762,
+      id => 762
   );
   # => {
   #     name => 'KGS Meijin Qualifier October 2012',
@@ -70,16 +70,19 @@ WWW::GoKGS::Scraper::TournInfo - Information for the KGS tournament
   #         entrants => [
   #             {
   #                 sort_by => 'name',
-  #                 uri => 'http://www.gokgs.com/tournEntrants.jsp?id=762&sort=n',
+  #                 uri     => '/tournEntrants.jsp?id=762&sort=n'
   #             },
-  #             ...
+  #             {
+  #                 sort_by => 'result',
+  #                 uri     => '/tournEntrants.jsp?id=762&sort=s'
+  #             }
   #         ],
   #         rounds => [
   #             {
-  #                 round => '1',
+  #                 round      => 1,
   #                 start_time => '2012-10-27T16:05Z',
-  #                 end_time => '2012-10-27T18:35Z',
-  #                 uri => 'http://www.gokgs.com/tournGames.jsp?id=762&round=1',
+  #                 end_time   => '2012-10-27T18:35Z',
+  #                 uri        => '/tournGames.jsp?id=762&round=1'
   #             },
   #             ...
   #         ]
@@ -145,9 +148,15 @@ the filtered value.
 
 =over 4
 
-=item $tourn_info->scrape
+=item $HashRef = $tourn_info->scrape( URI->new(...) )
 
-=item $tourn_info->query
+=item $HashRef = $tourn_info->scrape( HTTP::Response->new(...) )
+
+=item $HashRef = $tourn_info->scrape( $html[, $base_uri] )
+
+=item $HashRef = $tourn_info->scrape( \$html[, $base_uri] )
+
+=item $HashRef = $tourn_info->query( id => $tourn_id )
 
 =back
 

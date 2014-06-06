@@ -296,7 +296,7 @@ which represnets the result. The hashref is formatted as follows:
               handicap => '2',
               start_time => '2013-07-04T05:32Z',
               type => 'Ranked',
-              result => 'W+Res.'
+              result => 'W+Resign'
           },
           ...
       ],

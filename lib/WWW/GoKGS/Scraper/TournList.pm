@@ -69,20 +69,21 @@ WWW::GoKGS::Scraper::TournList - List of KGS tournaments
   my $tourn_list = WWW::GoKGS::Scraper::TournList->new;
 
   my $result = $tourn_list->query(
-      year => 2012,
+      year => 2012
   );
   # => {
   #     tournaments => [
+  #         ...
   #         {
   #             name => 'KGS Meijin Qualifier October 2012',
-  #             uri  => 'http://www.gokgs.com/tournInfo.jsp?id=762',
+  #             uri  => '/tournInfo.jsp?id=762',
   #         },
   #         ...
   #     ],
   #     year_index => [
   #         {
-  #             year => '2001',
-  #             uri  => 'http://www.gokgs.com/tournList.jsp?year=2001',
+  #             year => 2001,
+  #             uri  => '/tournList.jsp?year=2001',
   #         },
   #         ...
   #     ]
@@ -115,9 +116,15 @@ shared by L<Web::Scraper> users (C<$Web::Scraper::UserAgent>).
 
 =over 4
 
-=item $tourn_list->scrape
+=item $HashRef = $tourn_list->scrape( URI->new(...) )
 
-=item $tourn_list->query
+=item $HashRef = $tourn_list->scrape( HTTP::Response->new(...) )
+
+=item $HashRef = $tourn_list->scrape( $html[, $base_uri] )
+
+=item $HashRef = $tourn_list->scrape( \$html[, $base_uri] )
+
+=item $HashRef = $tourn_list->query( year => $Integer )
 
 =back
 

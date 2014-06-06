@@ -78,12 +78,13 @@ WWW::GoKGS::Scraper - Abstract base class for KGS scrapers
 
 =head1 DESCRIPTION
 
-This class is an abstract base class for KGS scrapers.
+This module is an abstract base class for KGS scrapers.
 KGS scrapers must inherit from this class, and also implement two methods;
 C<_build_base_uri> and C<_build_scraper>. C<_build_base_uri> must return
 a L<URI> object which represents a resource on KGS.
 C<_build_scraper> must return an L<Web::Scraper> object which can C<scrape>
-the resource. Both of them are called as a method on the object.
+the resource. Both of them are called as a method on the object
+with no parameters.
 
 =head2 ATTRIBUTES
 
@@ -108,9 +109,22 @@ shared by L<Web::Scraper> users (C<$Web::Scraper::UserAgent>).
 
 =over 4
 
-=item $scraper->scrape
+=item $scraper->scrape( URI->new(...) )
 
-=item $scraper->query
+=item $scraper->scrape( HTTP::Response->new(...) )
+
+=item $scraper->scrape( $html[, $base_uri] )
+
+=item $scraper->scrape( \$html[, $base_uri] )
+
+Given arguments are passed to the C<scrape> method of
+an L<Web::Scraper> object built by the C<_build_scraper> method.
+
+=item $scraper->query( $k1 => $v1, $k2 => $v2, ... )
+
+Given key-value pairs of query parameters,
+constructs a L<URI> object which consists of C<base_uri> and the query
+parameters, then pass the C<URI> to the C<scrape> method.
 
 =back
 

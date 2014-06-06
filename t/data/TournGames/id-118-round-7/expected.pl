@@ -8,7 +8,7 @@
     {
       'name' => 'Mango',
       'rank' => '-',
-      'type' => 'System'
+      'type' => 'No show'
     }
   ],
   'games' => [

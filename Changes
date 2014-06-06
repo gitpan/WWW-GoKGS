@@ -1,5 +1,14 @@
 Revision history for Perl extension WWW::GoKGS.
 
+0.03 Jun 6th, 2014
+
+  - improve documentation
+
+  [BUGFIX]
+
+    - Scraper::TournGames#scrape parses "Bye" properly
+      ($bye->{type} was invalid)
+
 0.02 Jun 5th, 2014
 
   - Add Scraper::GameArchives#result_filter

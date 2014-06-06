@@ -90,11 +90,11 @@ DESCRIPTION
           );
 
     $CodeRef = $gokgs->result_filter
-    $gokgs->result_filter( sub { my $result = shift; ... } )
         Can be used to get or set a game result filter. Defaults to an
         anonymous subref which just returns the given argument ("sub { $_[0]
         }"). The callback is called with a game result string such as
-        "B+Resign". The return value is used as the filtered value.
+        "B+Resign". The return value is used as the filtered value. This
+        attribute is read-only.
 
           my $gokgs = WWW::GoKGS->new(
               result_filter => sub {
