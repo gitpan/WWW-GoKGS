@@ -4,6 +4,7 @@ use warnings;
 use parent qw/WWW::GoKGS::Scraper/;
 use URI;
 use Web::Scraper;
+use WWW::GoKGS::Scraper::Filters qw/datetime/;
 use WWW::GoKGS::Scraper::TournLinks qw/process_links/;
 
 sub _build_base_uri {
@@ -17,29 +18,34 @@ sub _build_scraper {
         process '//h1', 'name' => [ 'TEXT', sub { s/ \([^)]+\)$// } ];
         process '//node()[preceding-sibling::h1 and following-sibling::div]',
                 'description[]' => sub { $_[0]->as_XML };
-        process_links date_filter => $self->date_filter;
+        process_links $self->_assoc_filter('links.rounds[].start_time'),
+                      $self->_assoc_filter('links.rounds[].end_time');
     };
 }
 
-sub html_filter {
+sub _build_filter {
     my $self = shift;
-    $self->{html_filter} = shift if @_;
-    $self->{html_filter} ||= sub { $_[0] };
+
+    {
+        'links.rounds[].start_time' => [ \&datetime ],
+        'links.rounds[].end_time'   => [ \&datetime ],
+    };
 }
 
-sub date_filter {
-    my $self = shift;
-    $self->{date_filter} = shift if @_;
-    $self->{date_filter} ||= sub { $_[0] };
+sub _assoc_filter {
+    my ( $self, $key ) = @_;
+    my @filters = $self->get_filter( $key );
+    @filters ? ( $key, \@filters ) : ();
 }
 
 sub scrape {
     my ( $self, @args ) = @_;
+    local $SIG{__WARN__} = sub { die $_[0] };
     my $result = $self->SUPER::scrape( @args );
 
     return $result unless $result->{description};
 
-    $result->{description} = $self->html_filter->(do {
+    $result->{description} = $self->run_filter('description', do {
         join q{}, @{$result->{description}};
     });
 
@@ -110,43 +116,42 @@ Can be used to get or set an L<LWP::UserAgent> object which is used to
 C<GET> the requested resource. Defaults to the C<LWP::UserAgent> object
 shared by L<Web::Scraper> users (C<$Web::Scraper::UserAgent>).
 
-=item $CodeRef = $tourn_info->html_filter
-
-=item $tourn_info->html_filter( sub { my $html = shift; ... } )
-
-Can be used to get or set an HTML filter.
-Defaults to an anonymous subref which just returns
-the given argument (C<sub { $_[0] }>). The callback is called with
-an HTML string. The return value is used as the filtered value.
-
-  $tourn_info->html_filter(sub { 
-      my $html = shift;
-      $html =~ s/<.*?>//g; # strip HTML tags
-      $html;
-  });
-
-=item $CodeRef = $tourn_info->date_filter
-
-=item $tourn_info->date_filter( sub { my $date = shift; ... } )
-
-Can be used to get or set a date filter.
-Defaults to an anonymous subref which just returns
-the given argument (C<sub { $_[0] }>). The callback is called with
-a date string such as C<2014-05-17T19:05Z>. The return value is used as
-the filtered value.
-
-  use Time::Piece qw/gmtime/;
-
-  $tourn_info->date_filter(sub {
-      my $date = shift; # => "2014-05-17T19:05Z"
-      gmtime->strptime( $date, '%Y-%m-%dT%H:%MZ' );
-  });
-
 =back
 
 =head2 METHODS
 
 =over 4
+
+=item $tourn_info->add_filter( 'description' => $filter )
+
+Adds a tournament description filter. C<$filter> is called with
+an HTML string. C<$filter> can be either a filter class name
+or a subref. See L<Web::Scraper::Filter> for details.
+
+  $tourn_info->add_filter(
+      'description' => sub { 
+          my $html = shift;
+          $html =~ s/<.*?>//g; # strip HTML tags
+          $html;
+      }
+  );
+
+=item $tourn_info->add_filter( 'links.rounds[].start_time' => $filter )
+
+=item $tourn_info->add_filter( 'links.rounds[].end_time' => $filter )
+
+Adds a round start/end time filter. C<$filter> is called with a date string
+such as C<2014-05-17T19:05Z>. C<$filter> can be either a filter class name
+or a subref. See L<Web::Scraper::Filter> for details.
+
+  use Time::Piece qw/gmtime/;
+
+  $tourn_info->add_filter(
+      'links.rounds[].start_time' => sub {
+          my $start_time = shift; # => "2014-05-17T19:05Z"
+          gmtime->strptime( $start_time, '%Y-%m-%dT%H:%MZ' );
+      }
+  );
 
 =item $HashRef = $tourn_info->scrape( URI->new(...) )
 

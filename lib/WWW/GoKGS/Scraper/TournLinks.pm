@@ -7,44 +7,35 @@ use Web::Scraper;
 our @EXPORT_OK = qw( process_links );
 
 sub process_links {
-    my %args = @_;
-
-    my $date_filter = do {
-        my $orig = $args{date_filter} || sub { $_[0] };
-
-        sub {
-            my $date = shift;
-            my ( $mon, $mday, $yy, $hour, $min, $ampm )
-                = $date =~ m{^(\d\d?)/(\d\d?)/(\d\d) (\d\d?):(\d\d) (AM|PM)$};
-            $orig->(do {
-                sprintf '%04d-%02d-%02dT%02d:%02dZ',
-                        $yy + 2000, $mon, $mday,
-                        $ampm eq 'PM' ? $hour + 12 : $hour, $min;
-            });
-        };
-    };
+    my %filter = @_;
 
     my $round_number = sub {
         m/^Round (\d+) / ? int $1 : undef;
     };
 
-    my $start_time = sub {
-        my $time = m/ will start at (.*)$/ && $1;
-        $time ||= m/\(([^\-]+) -/ ? $1 : undef;
-        $time =~ tr/\x{a0}/ / if $time;
-        $time;
-    };
+    my @start_time = (
+        sub {
+            my $time = m/ will start at (.*)$/ && $1;
+            $time ||= m/\(([^\-]+) -/ ? $1 : undef;
+            $time =~ tr/\x{a0}/ / if $time;
+            $time;
+        },
+        @{ $filter{'links.rounds[].start_time'} || [] },
+    );
 
-    my $end_time = sub {
-        my $time = m/- ([^)]+)\)$/ ? $1 : undef;
-        $time =~ tr/\x{a0}/ / if $time;
-        $time;
-    };
+    my @end_time = (
+        sub {
+            my $time = m/- ([^)]+)\)$/ ? $1 : undef;
+            $time =~ tr/\x{a0}/ / if $time;
+            $time;
+        },
+        @{ $filter{'links.rounds[].end_time'} || [] },
+    );
 
     my $round = scraper {
         process '.', 'round' => [ 'TEXT', $round_number ];
-        process '.', 'start_time' => [ 'TEXT', $start_time, $date_filter ];
-        process 'a', 'end_time' => [ 'TEXT', $end_time, $date_filter ];
+        process '.', 'start_time' => [ 'TEXT', @start_time ];
+        process 'a', 'end_time' => [ 'TEXT', @end_time ];
         process 'a', 'uri' => '@href';
     };
 

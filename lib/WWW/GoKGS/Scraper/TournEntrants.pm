@@ -4,6 +4,7 @@ use warnings;
 use parent qw/WWW::GoKGS::Scraper/;
 use URI;
 use Web::Scraper;
+use WWW::GoKGS::Scraper::Filters qw/datetime/;
 use WWW::GoKGS::Scraper::TournLinks qw/process_links/;
 
 sub _build_base_uri {
@@ -18,7 +19,7 @@ sub _build_scraper {
     scraper {
         process '//h1', 'name' => [ 'TEXT', sub { s/ Players$// } ];
         process '//table[tr/th[3]/text()="Score"]//following-sibling::tr',
-                'entrants[]' => scraper { # Swiss, McMahon
+                'entrants[]' => scraper { # Swiss or McMahon
                     process '//td[1]', 'position' => 'TEXT';
                     process '//td[2]', 'name' => [ 'TEXT', $name ];
                     process '//td[2]', 'rank' => [ 'TEXT', $rank ];
@@ -27,7 +28,7 @@ sub _build_scraper {
                     process '//td[5]', 'sodos' => 'TEXT';
                     process '//td[6]', 'notes' => 'TEXT'; };
         process '//table[tr/th[1]/text()="Name"]//following-sibling::tr',
-                'entrants[]' => scraper { # Double Elimination
+                'entrants[]' => scraper { # Single or Double Elimination
                     process '//td[1]', 'name' => [ 'TEXT', $name ];
                     process '//td[1]', 'rank' => [ 'TEXT', $rank ];
                     process '//td[2]', 'standing' => 'TEXT'; };
@@ -35,18 +36,29 @@ sub _build_scraper {
                 'entrants[]' => scraper { # Round Robin
                     process '//td', 'columns[]' => 'TEXT';
                     result 'columns'; };
-        process_links date_filter => $self->date_filter;
+        process_links $self->_assoc_filter('links.rounds[].start_time'),
+                      $self->_assoc_filter('links.rounds[].end_time');
     };
 }
 
-sub date_filter {
+sub _build_filter {
     my $self = shift;
-    $self->{date_filter} = shift if @_;
-    $self->{date_filter} ||= sub { $_[0] };
+
+    {
+        'links.rounds[].start_time' => [ \&datetime ],
+        'links.rounds[].end_time'   => [ \&datetime ],
+    };
+}
+
+sub _assoc_filter {
+    my ( $self, $key ) = @_;
+    my @filters = $self->get_filter( $key );
+    @filters ? ( $key, \@filters ) : ();
 }
 
 sub scrape {
     my ( $self, @args ) = @_;
+    local $SIG{__WARN__} = sub { die $_[0] };
     my $result = $self->SUPER::scrape( @args );
 
     return $result unless $result->{entrants};
@@ -201,6 +213,23 @@ shared by L<Web::Scraper> users (C<$Web::Scraper::UserAgent>).
 =head2 METHODS
 
 =over 4
+
+=item $tourn_entrants->add_filter( 'links.rounds[].start_time' => $filter )
+
+=item $tourn_entrants->add_filter( 'links.rounds[].end_time' => $filter )
+
+Adds a round start/end time filter. C<$filter> is called with a date string
+such as C<2014-05-17T19:05Z>. C<$filter> can be either a filter class name
+or a subref. See L<Web::Scraper::Filter> for details.
+
+  use Time::Piece qw/gmtime/;
+
+  $tourn_entrants->add_filter(
+      'links.rounds[].start_time' => sub {
+          my $start_time = shift; # => "2014-05-17T19:05Z"
+          gmtime->strptime( $start_time, '%Y-%m-%dT%H:%MZ' );
+      }
+  );
 
 =item $HashRef = $tourn_entrants->query( id => $tourn_id, sort => 's' )
 

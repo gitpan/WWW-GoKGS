@@ -15,11 +15,17 @@ sub _build_scraper {
     scraper {
         process '//table[@class="grid"]//following-sibling::tr',
                 'players[]' => scraper {
-                    process '//td[1]', 'position' => 'TEXT';
+                    process '//td[1]', 'position' => [ 'TEXT', sub { int } ];
                     process '//td[2]//a', 'name' => 'TEXT';
                     process '//td[2]//a', 'uri' => '@href';
                     process '//td[3]', 'rank' => 'TEXT'; };
     };
+}
+
+sub scrape {
+    my ( $self, @args ) = @_;
+    local $SIG{__WARN__} = sub { die $_[0] };
+    $self->SUPER::scrape( @args );
 }
 
 1;

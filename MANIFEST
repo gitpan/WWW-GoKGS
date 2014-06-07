@@ -11,6 +11,7 @@ inc/Module/Install/Win32.pm
 inc/Module/Install/WriteAll.pm
 lib/WWW/GoKGS.pm
 lib/WWW/GoKGS/Scraper.pm
+lib/WWW/GoKGS/Scraper/Filters.pm
 lib/WWW/GoKGS/Scraper/GameArchives.pm
 lib/WWW/GoKGS/Scraper/Top100.pm
 lib/WWW/GoKGS/Scraper/TournEntrants.pm

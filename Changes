@@ -1,5 +1,18 @@
 Revision history for Perl extension WWW::GoKGS.
 
+0.04 Jun 7th, 2014
+
+   - Add Scraper#get_filter, #add_filter and #run_filter
+   - Scraper#scrape throws an exception if warnings are caught
+
+  [INCOMPATIBLE CHANGES]
+
+    - Remove GoKGS#result_filter
+    - Remove Scraper::GameArchives#date_filter and #result_filter
+    - Remove Scraper::TournGames#date_filter and #result_filter
+    - Remove Scraper::TournInfo#date_filter and #html_filter
+    - Remove Scraper::TournEntrants#date_filter
+
 0.03 Jun 6th, 2014
 
   - improve documentation

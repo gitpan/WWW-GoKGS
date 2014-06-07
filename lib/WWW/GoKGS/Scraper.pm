@@ -2,6 +2,7 @@ package WWW::GoKGS::Scraper;
 use strict;
 use warnings;
 use Carp qw/croak/;
+use Web::Scraper qw//;
 
 sub new {
     my $class = shift;
@@ -21,7 +22,7 @@ sub base_uri {
 }
 
 sub _build_base_uri {
-    croak 'call to abstract method ', __PACKAGE__, '::base_uri';
+    croak 'call to abstract method ', __PACKAGE__, '::_build_base_uri';
 }
 
 sub _scraper {
@@ -48,6 +49,41 @@ sub query {
     my $url = $self->base_uri->clone;
     $url->query_form( @args );
     $self->scrape( $url );
+}
+
+sub _filter {
+    my $self = shift;
+    $self->{filter} ||= $self->_build_filter;
+}
+
+sub _build_filter { +{} }
+
+sub get_filter {
+    my ( $self, $key ) = @_;
+    @{ $self->_filter->{$key} || [] };
+}
+
+sub add_filter {
+    my ( $self, @pairs ) = @_;
+    my $filter = $self->_filter;
+
+    croak "Odd number of arguments passed to 'add_filter'" if @pairs % 2;
+
+    while ( my ($key, $value) = splice @pairs, 0, 2 ) {
+        push @{ $filter->{$key} ||= [] }, $value;
+    }
+
+    return;
+}
+
+sub run_filter {
+    my ( $self, $key, $value ) = @_;
+
+    for my $filter ( $self->get_filter($key) ) {
+        $value = Web::Scraper::run_filter( $value, $filter );
+    }
+
+    $value;
 }
 
 1;
@@ -108,6 +144,23 @@ shared by L<Web::Scraper> users (C<$Web::Scraper::UserAgent>).
 =head2 METHODS
 
 =over 4
+
+=item @filters = $scraper->get_filter( $key )
+
+Returns all the filters associated with C<$key>.
+
+=item $scraper->add_filter( $key => $filter )
+
+=item $scraper->add_filter( $k1 => $f1, $k2 => $f2, ... )
+
+Pushes C<$filter> onto the filter stack specified by C<$key>.
+You can also push multiple filters in one C<add_filter> call.
+C<$filter> can be either a filter class name or a subref.
+See L<Web::Scraper::Filter> for details.
+
+=item $filtered_value = $scraper->run_filter( $key, $value )
+
+Executes all the filters associated with C<$key> on C<$value>.
 
 =item $scraper->scrape( URI->new(...) )
 

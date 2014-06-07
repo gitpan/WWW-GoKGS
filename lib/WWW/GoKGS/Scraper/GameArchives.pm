@@ -4,6 +4,7 @@ use warnings;
 use parent qw/WWW::GoKGS::Scraper/;
 use URI;
 use Web::Scraper;
+use WWW::GoKGS::Scraper::Filters qw/datetime/;
 
 sub _build_base_uri {
     URI->new('http://www.gokgs.com/gameArchives.jsp');
@@ -41,7 +42,7 @@ sub _build_scraper {
         process qq{//following-sibling::td[text()!="\x{a0}"]},
                 'month[]' => scraper {
                     process '.', 'month' => [ 'TEXT', $month2num ];
-                    process 'a', 'uri'   => '@href'; };
+                    process 'a', 'uri' => '@href'; };
     };
 
     scraper {
@@ -54,20 +55,17 @@ sub _build_scraper {
     };
 }
 
-sub date_filter {
+sub _build_filter {
     my $self = shift;
-    $self->{date_filter} = shift if @_;
-    $self->{date_filter} ||= sub { $_[0] };
-}
 
-sub result_filter {
-    my $self = shift;
-    $self->{result_filter} = shift if @_;
-    $self->{result_filter} ||= sub { $_[0] };
+    {
+        'games[].start_time' => [ \&datetime ],
+    };
 }
 
 sub scrape {
     my ( $self, @args ) = @_;
+    local $SIG{__WARN__} = sub { die $_[0] };
     my $result = $self->SUPER::scrape( @args );
 
     return $result unless $result->{calendar};
@@ -89,38 +87,13 @@ sub scrape {
 
     return $result unless $result->{games};
 
-    my $date_filter = do {
-        my $orig = $self->date_filter;
-
-        sub {
-            my $date = shift;
-            my ( $mon, $mday, $yy, $hour, $min, $ampm )
-                = $date =~ m{^(\d\d?)/(\d\d?)/(\d\d) (\d\d?):(\d\d) (AM|PM)$};
-            $orig->(do {
-                sprintf '%04d-%02d-%02dT%02d:%02dZ',
-                        $yy + 2000, $mon, $mday,
-                        $ampm eq 'PM' ? $hour + 12 : $hour, $min;
-            });
-        };
-    };
-
-    my $result_filter = do {
-        my $orig = $self->result_filter;
-        
-        # use SGF-compatible format whenever possible
-        my %canonical = (
-            'W+Res.'  => 'W+Resign',
-            'B+Res.'  => 'B+Resign',
-            'W+Forf.' => 'W+Forfeit',
-            'B+Forf.' => 'B+Forfeit',
-            'Jigo'    => 'Draw',
-        );
-
-        sub {
-            my $r = shift;
-            $orig->( $canonical{$r} || $r );
-        };
-    };
+    my %canonical_result = (
+        'W+Res.'  => 'W+Resign',
+        'B+Res.'  => 'B+Resign',
+        'W+Forf.' => 'W+Forfeit',
+        'B+Forf.' => 'B+Forfeit',
+        'Jigo'    => 'Draw',
+    );
 
     for my $game ( @{$result->{games}} ) {
         next if exists $game->{black};
@@ -150,8 +123,13 @@ sub scrape {
         $game->{setup}      = $game->{maybe_setup};
     }
     continue {
-        $game->{start_time} = $date_filter->( $game->{start_time} );
-        $game->{result}     = $result_filter->( $game->{result} );
+        $game->{start_time}
+            = $self->run_filter( 'games[].start_time', $game->{start_time} );
+
+        # use SGF-compatible format whenever possible
+        $game->{result}
+            = $canonical_result{$game->{result}} || $game->{result};
+
         $game->{setup}      =~ /^(\d+)\x{d7}\d+ (?:H(\d+))?$/;
         $game->{board_size} = int $1;
         $game->{handicap}   = int $2 if $2;
@@ -227,47 +205,26 @@ Can be used to get or set an L<LWP::UserAgent> object which is used to
 C<GET> the requested resource. Defaults to the C<LWP::UserAgent> object
 shared by L<Web::Scraper> users (C<$Web::Scraper::UserAgent>).
 
-=item $CodeRef = $game_archives->date_filter
-
-=item $game_archives->date_filter( sub { my $date = shift; ... } )
-
-Can be used to get or set a date filter. Defaults to an anonymous subref
-which just returns the given argument (C<sub { $_[0] }>). The callback is
-called with a date string such as C<2014-05-17T19:05Z>.
-The return value is used as the filtered value.
-
-  use Time::Piece qw/gmtime/;
-
-  $game_archives->date_filter(sub {
-      my $date = shift; # => "2014-05-17T19:05Z"
-      gmtime->strptime( $date, '%Y-%m-%dT%H:%MZ' );
-  });
-
-=item $CodeRef = $game_archives->result_filter
-
-=item $game_archives->result_filter( sub { my $result = shift; ... } )
-
-Can be used to get or set a game result filter. Defaults to an anonymous subref
-which just returns the given argument (C<sub { $_[0] }>). The callback is
-called with a game result string such as C<B+Resign>.
-The return value is used as the filtered value.
-
-  $game_archives->result_filter(sub {
-      my $result = shift;
-
-      # I prefer "B+R" to "B+Resign", 
-      # while both of them are valid SGF-compatible format
-      return 'B+R' if $result eq 'B+Resign';
-      ...
-
-      $result;
-  });
-
 =back
 
 =head2 METHODS
 
 =over 4
+
+=item $game_archives->add_filter( 'games[].start_time' => $filter )
+
+Adds a game start time filter. C<$filter> is called with a date string
+such as C<2014-05-17T19:05Z>. C<$filter> can be either a filter class name
+or a subref. See L<Web::Scraper::Filter> for details.
+
+  use Time::Piece qw/gmtime/;
+
+  $game_archives->add_filter(
+      'games[].start_time' => sub {
+          my $start_time = shift; # => "2014-05-17T19:05Z"
+          gmtime->strptime( $start_time, '%Y-%m-%dT%H:%MZ' );
+      }
+  );
 
 =item $HashRef = $game_archives->query( user => 'YourAccount', ... )
 
