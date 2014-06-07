@@ -1,6 +1,6 @@
 package WWW::GoKGS::Scraper::TournGames;
 use strict;
-use warnings;
+use warnings FATAL => 'all';
 use parent qw/WWW::GoKGS::Scraper/;
 use URI;
 use Web::Scraper;
@@ -73,13 +73,11 @@ sub _build_filter {
 
 sub _assoc_filter {
     my ( $self, $key ) = @_;
-    my @filters = $self->get_filter( $key );
-    @filters ? ( $key, \@filters ) : ();
+    ( $key, [ $self->get_filter($key) ] );
 }
 
 sub scrape {
     my ( $self, @args ) = @_;
-    local $SIG{__WARN__} = sub { die $_[0] };
     my $result = $self->SUPER::scrape( @args );
 
     return $result unless $result->{games};

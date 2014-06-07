@@ -1,6 +1,6 @@
 package WWW::GoKGS::Scraper::Top100;
 use strict;
-use warnings;
+use warnings FATAL => 'all';
 use parent qw/WWW::GoKGS::Scraper/;
 use URI;
 use Web::Scraper;
@@ -20,12 +20,6 @@ sub _build_scraper {
                     process '//td[2]//a', 'uri' => '@href';
                     process '//td[3]', 'rank' => 'TEXT'; };
     };
-}
-
-sub scrape {
-    my ( $self, @args ) = @_;
-    local $SIG{__WARN__} = sub { die $_[0] };
-    $self->SUPER::scrape( @args );
 }
 
 1;

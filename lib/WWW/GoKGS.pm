@@ -12,20 +12,12 @@ use WWW::GoKGS::Scraper::TournGames;
 use WWW::GoKGS::Scraper::TournInfo;
 use WWW::GoKGS::Scraper::TournList;
 
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
 sub new {
     my $class = shift;
     my %args = @_ == 1 ? %{$_[0]} : @_;
     bless \%args, $class;
-}
-
-sub date_filter {
-    $_[0]->{date_filter} ||= sub { $_[0] };
-}
-
-sub html_filter {
-    $_[0]->{html_filter} ||= sub { $_[0] };
 }
 
 sub user_agent {
@@ -41,22 +33,17 @@ sub _build_user_agent {
     );
 }
 
-sub _scraper {
-    my $self = shift;
-    $self->{scraper} ||= $self->_build_scraper;
+sub date_filter {
+    $_[0]->{date_filter} ||= sub { $_[0] };
 }
 
-sub _build_scraper {
-    my $self = shift;
+sub html_filter {
+    $_[0]->{html_filter} ||= sub { $_[0] };
+}
 
-    +{ map { $_->base_uri->path => $_ } (
-        $self->_build_game_archives,
-        $self->_build_top_100,
-        $self->_build_tourn_list,
-        $self->_build_tourn_info,
-        $self->_build_tourn_entrants,
-        $self->_build_tourn_games,
-    )};
+sub game_archives {
+    my $self = shift;
+    $self->{game_archives} ||= $self->_build_game_archives;
 }
 
 sub _build_game_archives {
@@ -73,6 +60,11 @@ sub _build_game_archives {
     $game_archives;
 }
 
+sub top_100 {
+    my $self = shift;
+    $self->{top_100} ||= $self->_build_top_100;
+}
+
 sub _build_top_100 {
     my $self = shift;
 
@@ -81,12 +73,22 @@ sub _build_top_100 {
     );
 }
 
+sub tourn_list {
+    my $self = shift;
+    $self->{tourn_list} ||= $self->_build_tourn_list;
+}
+
 sub _build_tourn_list {
     my $self = shift;
 
     WWW::GoKGS::Scraper::TournList->new(
         user_agent => $self->user_agent,
     );
+}
+
+sub tourn_info {
+    my $self = shift;
+    $self->{tourn_info} ||= $self->_build_tourn_info;
 }
 
 sub _build_tourn_info {
@@ -105,6 +107,11 @@ sub _build_tourn_info {
     $tourn_info;
 }
 
+sub tourn_entrants {
+    my $self = shift;
+    $self->{tourn_entrants} ||= $self->_build_tourn_entrants;
+}
+
 sub _build_tourn_entrants {
     my $self = shift;
 
@@ -118,6 +125,11 @@ sub _build_tourn_entrants {
     );
 
     $tourn_entrants;
+}
+
+sub tourn_games {
+    my $self = shift;
+    $self->{tourn_games} ||= $self->_build_tourn_games;
 }
 
 sub _build_tourn_games {
@@ -136,28 +148,22 @@ sub _build_tourn_games {
     $tourn_games;
 }
 
-sub game_archives {
-    $_[0]->_scraper->{'/gameArchives.jsp'};
+sub _scraper {
+    my $self = shift;
+    $self->{scraper} ||= $self->_build_scraper;
 }
 
-sub top_100 {
-    $_[0]->_scraper->{'/top100.jsp'};
-}
+sub _build_scraper {
+    my $self = shift;
 
-sub tourn_list {
-    $_[0]->_scraper->{'/tournList.jsp'};
-}
-
-sub tourn_info {
-    $_[0]->_scraper->{'/tournInfo.jsp'};
-}
-
-sub tourn_entrants {
-    $_[0]->_scraper->{'/tournEntrants.jsp'};
-}
-
-sub tourn_games {
-    $_[0]->_scraper->{'/tournGames.jsp'};
+    +{ map { $_->base_uri->path => $_ } (
+        $self->game_archives,
+        $self->top_100,
+        $self->tourn_list,
+        $self->tourn_info,
+        $self->tourn_entrants,
+        $self->tourn_games,
+    )};
 }
 
 sub scrape {
@@ -286,27 +292,6 @@ the filtered value. This attribute is read-only.
       date_filter => sub {
           my $date = shift; # => "2014-05-17T19:05Z"
           gmtime->strptime( $date, '%Y-%m-%dT%H:%MZ' );
-      }
-  );
-
-=item $CodeRef = $gokgs->result_filter
-
-Can be used to get or set a game result filter. Defaults to an anonymous subref
-which just returns the given argument (C<sub { $_[0] }>). The callback is
-called with a game result string such as C<B+Resign>.
-The return value is used as the filtered value.
-This attribute is read-only.
-
-  my $gokgs = WWW::GoKGS->new(
-      result_filter => sub {
-          my $result = shift; # => "B+Resign"
-
-          # I prefer "B+R" to "B+Resign", 
-          # while both of them are valid SGF-compatible format
-          return 'B+R' if $result eq 'B+Resign';
-          ...
-
-          $result;
       }
   );
 

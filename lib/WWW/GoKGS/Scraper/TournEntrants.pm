@@ -52,13 +52,11 @@ sub _build_filter {
 
 sub _assoc_filter {
     my ( $self, $key ) = @_;
-    my @filters = $self->get_filter( $key );
-    @filters ? ( $key, \@filters ) : ();
+    ( $key, [ $self->get_filter($key) ] );
 }
 
 sub scrape {
     my ( $self, @args ) = @_;
-    local $SIG{__WARN__} = sub { die $_[0] };
     my $result = $self->SUPER::scrape( @args );
 
     return $result unless $result->{entrants};
@@ -103,7 +101,7 @@ sub scrape {
         $result->{entrants} = \@entrants;
         $result->{results}  = \%results if %results;
     }
-    elsif ( exists $result->{entrants}->[0]->{score} ) { # Swiss, McMahon
+    elsif ( exists $result->{entrants}->[0]->{score} ) { # Swiss or McMahon
         my $preceding;
         for my $entrant ( @{$result->{entrants}} ) {
             $entrant->{position} =~ s/\(tie\)$//;
@@ -126,7 +124,7 @@ sub scrape {
             $preceding = $entrant;
         }
     }
-    else { # Double Elimination
+    else { # Single or Double Elimination
     }
 
     for my $entrant ( @{$result->{entrants}} ) {

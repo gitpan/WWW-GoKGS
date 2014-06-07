@@ -1,6 +1,6 @@
 package WWW::GoKGS::Scraper::GameArchives;
 use strict;
-use warnings;
+use warnings FATAL => 'all';
 use parent qw/WWW::GoKGS::Scraper/;
 use URI;
 use Web::Scraper;
@@ -65,7 +65,6 @@ sub _build_filter {
 
 sub scrape {
     my ( $self, @args ) = @_;
-    local $SIG{__WARN__} = sub { die $_[0] };
     my $result = $self->SUPER::scrape( @args );
 
     return $result unless $result->{calendar};
@@ -87,6 +86,7 @@ sub scrape {
 
     return $result unless $result->{games};
 
+    # use SGF-compatible format whenever possible
     my %canonical_result = (
         'W+Res.'  => 'W+Resign',
         'B+Res.'  => 'B+Resign',
@@ -123,13 +123,8 @@ sub scrape {
         $game->{setup}      = $game->{maybe_setup};
     }
     continue {
-        $game->{start_time}
-            = $self->run_filter( 'games[].start_time', $game->{start_time} );
-
-        # use SGF-compatible format whenever possible
-        $game->{result}
-            = $canonical_result{$game->{result}} || $game->{result};
-
+        $game->{start_time} = $self->run_filter( 'games[].start_time', $game->{start_time} );
+        $game->{result}     = $canonical_result{$game->{result}} || $game->{result};
         $game->{setup}      =~ /^(\d+)\x{d7}\d+ (?:H(\d+))?$/;
         $game->{board_size} = int $1;
         $game->{handicap}   = int $2 if $2;
@@ -234,7 +229,7 @@ which represnets the result. The hashref is formatted as follows:
   {
       games => [
           {
-              sgf_uri => 'http://.../games/2013/7/4/foo-bar.sgf',
+              sgf_uri => 'http://files.gokgs.com/.../foo-bar.sgf',
               white => [
                   {
                       name => 'foo',
@@ -260,10 +255,11 @@ which represnets the result. The hashref is formatted as follows:
       zip_uri => 'http://.../foo-2013-7.zip',    # contains SGF files
       tgz_uri => 'http://.../foo-2013-7.tar.gz', # created in July 2013
       calendar => [
+          ...
           {
-              year  => '2011',
-              month => '7',
-              uri   => 'http://...&year=2011&month=7...',
+              year  => 2011,
+              month => 7,
+              uri   => '/gameArchives.jsp?user=foo&year=2011&month=7'
           },
           ...
       ]
@@ -285,8 +281,8 @@ Can be used to search games played in the specified month.
 
   my $result = $game_archives->query(
       user  => 'foo',
-      year  => '2013',
-      month => '7',
+      year  => 2013
+      month => 7
   );
 
 =item oldAccounts

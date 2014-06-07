@@ -1,6 +1,6 @@
 package WWW::GoKGS::Scraper::Filters;
 use strict;
-use warnings;
+use warnings FATAL => 'all';
 use Exporter qw/import/;
 
 our @EXPORT_OK = qw(

@@ -5,6 +5,8 @@ readme_from 'lib/WWW/GoKGS.pm';
 
 repository 'https://github.com/anazawa/p5-WWW-GoKGS';
 
+no_index directory => 'examples';
+
 requires 'Carp';
 requires 'parent';
 requires 'URI';

@@ -1,0 +1,122 @@
+use strict;
+use warnings;
+use JSON;
+use Plack::Request;
+use Plack::Response;
+use Try::Tiny;
+use WWW::GoKGS;
+
+my $GoKGS = WWW::GoKGS->new;
+my $JSON = JSON->new->ascii->convert_blessed;
+
+my $app = sub {
+    my $env = shift;
+    my $request = Plack::Request->new( $env );
+
+    my $response = try {
+        my $resource = $GoKGS->scrape(do {
+            my $uri = $request->uri;
+            $uri->authority( 'www.gokgs.com' );
+            $uri;
+        });
+
+        my $json = do {
+            local *URI::TO_JSON = sub {
+                my $self = shift;
+
+                if ( $self =~ m{^http://www\.gokgs\.com/\w+\.jsp\??} ) {
+                    my $uri = $request->base;
+                    $uri->path( $self->path );
+                    $uri->query_form( $self->query_form );
+                    $uri->as_string;
+                }
+                else {
+                    $self->as_string;
+                }
+            };
+
+            $JSON->encode( $resource );
+        };
+
+        Plack::Response->new(
+            200,
+            [
+                'Content-Length' => length $json,
+                'Content-Type'   => 'application/json; charset=utf-8',
+            ],
+            $json
+        );
+    }
+    catch {
+        if ( /^Don't know how to scrape / ) {
+            Plack::Response->new(
+                404,
+                [
+                    'Content-Length' => 9,
+                    'Content-Type'   => 'text/plain',
+                ],
+                'Not Found'
+            );
+        }
+        else {
+            Plack::Response->new(
+                500,
+                [
+                    'Content-Length' => length,
+                    'Content-Type'   => 'text/plain',
+                ],
+                $_
+            );
+        }
+    };
+
+    $response->finalize;
+};
+
+__END__
+
+=head1 NAME
+
+gokgs.psgi - JSON representation of KGS resources
+
+=head1 SYNOPSIS
+
+  # Using Plack
+  plackup -Ilib examples/gokgs.psgi
+
+=head1 DESCRIPTION
+
+This script is a L<PSGI> application to debug L<WWW::GoKGS>.
+
+=head1 METHODS
+
+=over 4
+  
+=item GET /gameArchives.jsp
+
+=item GET /top100.jsp
+
+=item GET /tournList.jsp
+
+=item GET /tournInfo.jsp
+
+=item GET /tournEntrants.jsp
+
+=item GET /tournGames.jsp
+
+=back
+
+=head1 REQUIRED MODULES
+
+L<Plack::Request>, L<Plack::Response>, L<Try::Tiny>, L<JSON>
+
+=head1 AUTHOR
+
+Ryo Anazawa (anazawa@cpan.org)
+
+=head1 LICENSE
+
+This module is free software; you can redistribute it and/or
+modify it under the same terms as Perl itself. See L<perlartistic>.
+
+=cut

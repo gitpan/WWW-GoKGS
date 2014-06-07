@@ -46,9 +46,12 @@ sub scrape {
 
 sub query {
     my ( $self, @args ) = @_;
-    my $url = $self->base_uri->clone;
-    $url->query_form( @args );
-    $self->scrape( $url );
+
+    $self->scrape(do {
+        my $url = $self->base_uri->clone;
+        $url->query_form( @args );
+        $url;
+    });
 }
 
 sub _filter {

@@ -1,6 +1,6 @@
 package WWW::GoKGS::Scraper::TournList;
 use strict;
-use warnings;
+use warnings FATAL => 'all';
 use parent qw/WWW::GoKGS::Scraper/;
 use URI;
 use Web::Scraper;
@@ -34,7 +34,6 @@ sub _build_scraper {
 
 sub scrape {
     my ( $self, @args ) = @_;
-    local $SIG{__WARN__} = sub { die $_[0] };
     my $result = $self->SUPER::scrape( @args );
     my $year_index = $result->{year_index};
 

@@ -1,5 +1,10 @@
 Revision history for Perl extension WWW::GoKGS.
 
+0.05 Jun 8th, 2014
+
+  - Add examples/gokgs.psgi
+  - Add "use warnings FATAL => 'all'" to scrapers
+
 0.04 Jun 7th, 2014
 
    - Add Scraper#get_filter, #add_filter and #run_filter
