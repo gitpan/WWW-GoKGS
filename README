@@ -31,7 +31,12 @@ SYNOPSIS
       my $tourn_games_2 = $gokgs->tourn_games->query( id => 123, round => 1 );
 
 DESCRIPTION
-    This module is a KGS Go Server ("http://www.gokgs.com/") scraper.
+    This module is a KGS Go Server ("http://www.gokgs.com/") scraper. KGS
+    allows the users to play a board game called go a.k.a. baduk (Korean) or
+    weiqi (Chinese). Although the web server provides resources generated
+    dynamically, such as Game Archives, they are formatted as HTML, the only
+    format. This module provides yet another representation of those
+    resources, Perl data structure.
 
     This class maps a URI preceded by "http://www.gokgs.com/" to a proper
     scraper. The supported resources on KGS are as follows:
@@ -172,8 +177,12 @@ DESCRIPTION
 
         See WWW::GoKGS::Scraper::TournGames for details.
 
+ACKNOWLEDGEMENT
+    Thanks to wms, the author of KGS Go Server, we can enjoy playing go
+    online for free.
+
 SEE ALSO
-    Web::Scraper
+    KGS Go Server <http://www.gokgs.com>, Web::Scraper
 
 AUTHOR
     Ryo Anazawa (anazawa@cpan.org)

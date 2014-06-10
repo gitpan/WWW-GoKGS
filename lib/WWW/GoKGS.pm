@@ -12,7 +12,7 @@ use WWW::GoKGS::Scraper::TournGames;
 use WWW::GoKGS::Scraper::TournInfo;
 use WWW::GoKGS::Scraper::TournList;
 
-our $VERSION = '0.05';
+our $VERSION = '0.06';
 
 sub new {
     my $class = shift;
@@ -223,10 +223,14 @@ WWW::GoKGS - KGS Go Server (http://www.gokgs.com/) Scraper
 =head1 DESCRIPTION
 
 This module is a KGS Go Server (C<http://www.gokgs.com/>) scraper.
+KGS allows the users to play a board game called go a.k.a. baduk (Korean)
+or weiqi (Chinese). Although the web server provides resources generated
+dynamically, such as Game Archives, they are formatted as HTML,
+the only format. This module provides yet another representation of those
+resources, Perl data structure.
 
 This class maps a URI preceded by C<http://www.gokgs.com/>
-to a proper scraper.
-The supported resources on KGS are as follows:
+to a proper scraper. The supported resources on KGS are as follows:
 
 =over 4
 
@@ -399,9 +403,14 @@ See L<WWW::GoKGS::Scraper::TournGames> for details.
 
 =back
 
+=head1 ACKNOWLEDGEMENT
+
+Thanks to wms, the author of KGS Go Server, we can enjoy playing go online
+for free.
+
 =head1 SEE ALSO
 
-L<Web::Scraper>
+L<KGS Go Server|http://www.gokgs.com>, L<Web::Scraper>
 
 =head1 AUTHOR
 

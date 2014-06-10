@@ -48,9 +48,9 @@ sub query {
     my ( $self, @args ) = @_;
 
     $self->scrape(do {
-        my $url = $self->base_uri->clone;
-        $url->query_form( @args );
-        $url;
+        my $uri = $self->base_uri->clone;
+        $uri->query_form( @args );
+        $uri;
     });
 }
 

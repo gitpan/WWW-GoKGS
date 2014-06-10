@@ -14,38 +14,57 @@ my $app = sub {
     my $request = Plack::Request->new( $env );
 
     my $response = try {
-        my $resource = $GoKGS->scrape(do {
-            my $uri = $request->uri;
-            $uri->authority( 'www.gokgs.com' );
-            $uri;
-        });
+        if ( $request->method eq 'GET' ) {
+            my $resource = $GoKGS->scrape(do {
+                my $uri = $request->uri;
+                $uri->authority( 'www.gokgs.com' );
+                $uri;
+            });
 
-        my $json = do {
-            local *URI::TO_JSON = sub {
-                my $self = shift;
+            my $json = do {
+                local *URI::TO_JSON = sub {
+                    my $self = shift;
 
-                if ( $self =~ m{^http://www\.gokgs\.com/\w+\.jsp\??} ) {
-                    my $uri = $request->base;
-                    $uri->path( $self->path );
-                    $uri->query_form( $self->query_form );
-                    $uri->as_string;
-                }
-                else {
-                    $self->as_string;
-                }
+                    if ( $self =~ m{^http://www\.gokgs\.com/\w+\.jsp\??} ) {
+                        my $uri = $request->base;
+
+                        $uri->path(do {
+                            my $path = $self->path;
+                            $path =~ s{^/}{};
+                            $uri->path . $path;
+                        });
+
+                        $uri->query_form( $self->query_form );
+
+                        $uri->as_string;
+                    }
+                    else {
+                        $self->as_string;
+                    }
+                };
+
+                $JSON->encode( $resource );
             };
 
-            $JSON->encode( $resource );
-        };
-
-        Plack::Response->new(
-            200,
-            [
-                'Content-Length' => length $json,
-                'Content-Type'   => 'application/json; charset=utf-8',
-            ],
-            $json
-        );
+            Plack::Response->new(
+                200,
+                [
+                    'Content-Length' => length $json,
+                    'Content-Type'   => 'application/json; charset=utf-8',
+                ],
+                $json
+            );
+        }
+        else {
+            Plack::Response->new(
+                405,
+                [
+                    'Content-Length' => 18,
+                    'Content-Type'   => 'text/plain',
+                ],
+                'Method Not Allowed'
+            );
+        }
     }
     catch {
         if ( /^Don't know how to scrape / ) {
@@ -59,13 +78,15 @@ my $app = sub {
             );
         }
         else {
+            warn $request->method, ' ', $request->path_info, " failed: $_";
+
             Plack::Response->new(
                 500,
                 [
-                    'Content-Length' => length,
+                    'Content-Length' => 21,
                     'Content-Type'   => 'text/plain',
                 ],
-                $_
+                'Internal Server Error'
             );
         }
     };
@@ -81,7 +102,7 @@ gokgs.psgi - JSON representation of KGS resources
 
 =head1 SYNOPSIS
 
-  # Using Plack
+  # using Plack
   plackup -Ilib examples/gokgs.psgi
 
 =head1 DESCRIPTION
