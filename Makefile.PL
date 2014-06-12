@@ -13,6 +13,8 @@ requires 'URI';
 requires 'Web::Scraper';
 requires 'Exporter';
 requires 'LWP::UserAgent';
+requires 'Scalar::Util';
+requires 'String::CamelCase';
 
 test_requires 'Test::More' => '0.98';
 test_requires 'Test::Exception';

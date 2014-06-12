@@ -91,9 +91,17 @@ subtest 'WWW::GoKGS' => sub {
     isa_ok $gokgs->tourn_info, 'WWW::GoKGS::Scraper::TournInfo';
     isa_ok $gokgs->tourn_entrants, 'WWW::GoKGS::Scraper::TournEntrants';
     isa_ok $gokgs->tourn_games, 'WWW::GoKGS::Scraper::TournGames';
-    can_ok $gokgs, qw( scrape );
+    can_ok $gokgs, qw( get_scraper set_scraper scrape );
 
     throws_ok {
-        $gokgs->scrape('/fooBar.jsp');
+        $gokgs->set_scraper( '/fooBar.jsp' );
+    } qr{^Odd number of arguments passed to 'set_scraper'};
+
+    throws_ok {
+        $gokgs->set_scraper( '/fooBar.jsp' => 'FooBar' );
+    } qr{^FooBar \(/fooBar\.jsp scraper\) is missing 'scrape' method};
+
+    throws_ok {
+        $gokgs->scrape( '/fooBar.jsp' );
     } qr{^Don't know how to scrape '/fooBar\.jsp'};
 };

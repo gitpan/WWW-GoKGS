@@ -26,6 +26,7 @@ META.yml
 README
 t/00_compile.t
 t/10_basic.t
+t/11_subclassing.t
 t/20_static.t
 t/data/GameArchives/user-anazawa-year-2013-month-7/expected.pl
 t/data/GameArchives/user-anazawa-year-2013-month-7/input.html

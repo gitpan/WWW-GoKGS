@@ -150,7 +150,7 @@ WWW::GoKGS::Scraper::TournGames - Games of the KGS tournament
   #         },
   #         ...
   #     ],
-  #     byes = [
+  #     byes => [
   #         {
   #             name => 'baz',
   #             rank => '2d',
