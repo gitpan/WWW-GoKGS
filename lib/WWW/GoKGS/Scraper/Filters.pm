@@ -9,11 +9,16 @@ our @EXPORT_OK = qw(
 
 sub datetime {
     my $time = shift;
-    my ( $mon, $mday, $yy, $hour, $min, $ampm )
+    my ( $mon, $mday, $year, $hour, $min, $ampm )
         = $time =~ m{^(\d\d?)/(\d\d?)/(\d\d) (\d\d?):(\d\d) (AM|PM)$};
+
+    $year += 2000;
+    $hour -= 12 if $ampm eq 'AM' and $hour == 12;
+    $hour += 12 if $ampm eq 'PM' and $hour != 12;
+
     sprintf '%04d-%02d-%02dT%02d:%02dZ',
-            $yy + 2000, $mon, $mday,
-            $ampm eq 'PM' ? $hour + 12 : $hour, $min;
+            $year, $mon, $mday,
+            $hour, $min;
 }
 
 1;

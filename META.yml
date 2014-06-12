@@ -38,4 +38,4 @@ requires:
 resources:
   license: http://dev.perl.org/licenses/
   repository: https://github.com/anazawa/p5-WWW-GoKGS
-version: '0.07'
+version: '0.08'

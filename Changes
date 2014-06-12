@@ -1,5 +1,11 @@
 Revision history for Perl extension WWW::GoKGS.
 
+0.08 Jun 13th, 2014
+
+  [BUGFIX]
+
+    - Parse KGS dates such as "2/13/14 12:14 AM" properly
+
 0.07 Jun 12th, 2014
 
   - Require Scalar::Util and String::CamelCase

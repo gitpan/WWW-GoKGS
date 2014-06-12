@@ -458,7 +458,7 @@
       'board_size' => 19,
       'result' => 'B+Resign',
       'sgf_uri' => bless( do{\(my $o = 'http://files.gokgs.com/games/2013/7/27/anazawa-honingo.sgf')}, 'URI::http' ),
-      'start_time' => '2013-07-27T24:11Z',
+      'start_time' => '2013-07-27T12:11Z',
       'type' => 'Ranked',
       'white' => [
         {
@@ -626,7 +626,7 @@
       'board_size' => 19,
       'result' => 'B+Resign',
       'sgf_uri' => bless( do{\(my $o = 'http://files.gokgs.com/games/2013/7/26/Plustwo-anazawa.sgf')}, 'URI::http' ),
-      'start_time' => '2013-07-26T24:55Z',
+      'start_time' => '2013-07-26T12:55Z',
       'type' => 'Free',
       'white' => [
         {
@@ -709,7 +709,7 @@
       'board_size' => 19,
       'result' => 'W+8.5',
       'sgf_uri' => bless( do{\(my $o = 'http://files.gokgs.com/games/2013/7/25/kuroguchi3-anazawa.sgf')}, 'URI::http' ),
-      'start_time' => '2013-07-25T24:08Z',
+      'start_time' => '2013-07-25T12:08Z',
       'type' => 'Ranked',
       'white' => [
         {
@@ -792,7 +792,7 @@
       'board_size' => 19,
       'result' => 'W+27.5',
       'sgf_uri' => bless( do{\(my $o = 'http://files.gokgs.com/games/2013/7/24/jbdys-anazawa.sgf')}, 'URI::http' ),
-      'start_time' => '2013-07-24T24:00Z',
+      'start_time' => '2013-07-24T12:00Z',
       'type' => 'Free',
       'white' => [
         {
@@ -1251,7 +1251,7 @@
       'board_size' => 19,
       'result' => 'B+Resign',
       'sgf_uri' => bless( do{\(my $o = 'http://files.gokgs.com/games/2013/7/17/anazawa-yung95.sgf')}, 'URI::http' ),
-      'start_time' => '2013-07-17T12:25Z',
+      'start_time' => '2013-07-17T00:25Z',
       'type' => 'Free',
       'white' => [
         {
@@ -1653,7 +1653,7 @@
       'handicap' => 5,
       'result' => 'W+8.5',
       'sgf_uri' => bless( do{\(my $o = 'http://files.gokgs.com/games/2013/7/14/anazawa-urri06.sgf')}, 'URI::http' ),
-      'start_time' => '2013-07-14T12:53Z',
+      'start_time' => '2013-07-14T00:53Z',
       'type' => 'Ranked',
       'white' => [
         {
@@ -2386,7 +2386,7 @@
       'handicap' => 2,
       'result' => 'B+4.5',
       'sgf_uri' => bless( do{\(my $o = 'http://files.gokgs.com/games/2013/7/5/oojiigo-anazawa.sgf')}, 'URI::http' ),
-      'start_time' => '2013-07-05T24:30Z',
+      'start_time' => '2013-07-05T12:30Z',
       'type' => 'Ranked',
       'white' => [
         {

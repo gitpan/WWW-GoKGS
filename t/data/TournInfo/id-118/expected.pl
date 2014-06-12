@@ -41,7 +41,7 @@
         'uri' => bless( do{\(my $o = 'http://www.gokgs.com/tournGames.jsp?id=118&round=3')}, 'URI::http' )
       },
       {
-        'end_time' => '2005-09-04T24:00Z',
+        'end_time' => '2005-09-04T12:00Z',
         'round' => '4',
         'start_time' => '2005-09-04T11:00Z',
         'uri' => bless( do{\(my $o = 'http://www.gokgs.com/tournGames.jsp?id=118&round=4')}, 'URI::http' )
@@ -49,7 +49,7 @@
       {
         'end_time' => '2005-09-04T13:00Z',
         'round' => '5',
-        'start_time' => '2005-09-04T24:00Z',
+        'start_time' => '2005-09-04T12:00Z',
         'uri' => bless( do{\(my $o = 'http://www.gokgs.com/tournGames.jsp?id=118&round=5')}, 'URI::http' )
       },
       {

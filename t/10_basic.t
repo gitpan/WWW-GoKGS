@@ -1,14 +1,27 @@
 use strict;
 use warnings;
 use Test::Exception;
-use Test::More tests => 7;
+use Test::More tests => 8;
 use WWW::GoKGS;
+use WWW::GoKGS::Scraper::Filters qw/datetime/;
 use WWW::GoKGS::Scraper::GameArchives;
 use WWW::GoKGS::Scraper::Top100;
 use WWW::GoKGS::Scraper::TournList;
 use WWW::GoKGS::Scraper::TournInfo;
 use WWW::GoKGS::Scraper::TournEntrants;
 use WWW::GoKGS::Scraper::TournGames;
+
+subtest 'datetime()' => sub {
+    my @tests = (
+        '2/13/14 12:14 AM' => '2014-02-13T00:14Z',
+        '6/9/14 12:14 PM'  => '2014-06-09T12:14Z',
+    );
+
+    while ( my ($input, $expected) = splice @tests, 0, 2 ) {
+        is datetime( $input ), $expected,
+           "datetime('$input') should return '$expected'";
+    }
+};
 
 subtest 'WWW::GoKGS::Scraper::GameArchives' => sub {
     my $game_archives = WWW::GoKGS::Scraper::GameArchives->new;
