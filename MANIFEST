@@ -12,6 +12,7 @@ lib/WWW/GoKGS/Scraper/TournGames.pm
 lib/WWW/GoKGS/Scraper/TournInfo.pm
 lib/WWW/GoKGS/Scraper/TournLinks.pm
 lib/WWW/GoKGS/Scraper/TournList.pm
+LICENSE
 MANIFEST			This list of files
 META.json
 META.yml
@@ -26,4 +27,11 @@ xt/12_tourn_list.t
 xt/13_tourn_info.t
 xt/14_tourn_entrants.t
 xt/15_tourn_games.t
+xt/data/GameArchives/20140615-user-anazawa-year-2014-month-5.pl
+xt/data/TournEntrants/20140616-id-104-sort-n.pl
+xt/data/TournEntrants/20140616-id-12-sort-n.pl
+xt/data/TournEntrants/20140616-id-857-sort-n.pl
+xt/data/TournGames/20140616-id-488-round-1.pl
+xt/data/TournInfo/20140616-id-857.pl
+xt/data/TournList/20140616-year-2013.pl
 xt/Util.pm

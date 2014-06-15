@@ -4,19 +4,22 @@ use warnings;
 use Exporter qw/import/;
 use Time::Piece qw/gmtime/;
 
-our @EXPORT_OK = qw(
-    cmp_deeply
-    hash
-    array
-    uri
-    integer
-    real
-    datetime
+our %EXPORT_TAGS = (
+    cmp_deeply => [qw(
+        cmp_deeply
+        hash
+        array
+        uri
+        integer
+        real
+        datetime
+        game_result
+        user_name
+        user_rank
+    )],
 );
 
-our %EXPORT_TAGS = (
-    cmp_deeply => [qw/cmp_deeply hash array uri integer real datetime/],
-);
+our @EXPORT_OK = map { @$_ } values %EXPORT_TAGS;
 
 sub cmp_deeply {
     my ( $got, $expected, $name ) = @_;
@@ -40,9 +43,7 @@ sub hash {
 
         for my $key ( keys %$got ) {
             my $value = $got->{$key};
-
             my $n = "$name\->{$key}";
-               $n .= ": '$value'" unless ref($value) =~ /^(?:HASH|ARRAY)$/;
 
             if ( ref $expected{$key} eq 'CODE' ) {
                 local $_ = $value;
@@ -73,13 +74,10 @@ sub array {
 
         my $i = 0;
         for my $g ( @$got ) {
-            my $n = "$name\->[$i]";
-               $n .= ": '$g'" unless ref($g) =~ /^(?:HASH|ARRAY)$/;
-
             local $_ = $g;
+            my $n = "$name\->[$i]";
             my $bool = $expected->( $g, $n );
             Test::More::ok( $bool, $n ) if defined $bool;
-
             $i++;
         }
 
@@ -102,7 +100,7 @@ sub integer {
         Test::More::like(
             $got,
             qr{^(?:0|\-?[1-9][0-9]*)$},
-            "$name should be integer"
+            "'$name' should be integer"
         );
 
         return;
@@ -116,7 +114,7 @@ sub real {
         Test::More::like(
             $got,
             qr{^(?:0|\-?[1-9][0-9]*(?:\.[0-9]*[1-9])?)$},
-            "$name should be real"
+            "'$name' should be real"
         );
 
         return;
@@ -129,7 +127,57 @@ sub datetime {
     sub {
         my ( $got, $name ) = @_;
         eval { gmtime->strptime( $got, $format ) };
-        Test::More::ok( !$@, "$name should be '$format': $@" );
+        Test::More::ok( !$@, "'$name' ($got) should be '$format': $@" );
+        return;
+    };
+}
+
+sub game_result {
+    sub {
+        my ( $got, $name ) = @_;
+
+        Test::More::like(
+            $got,
+            qr{^(?:
+                Unfinished
+              | Draw 
+              | (?:B|W)\+(?:
+                    Resign
+                  | Forfeit
+                  | Time
+                  | (?:0|[1-9][0-9]*)(?:\.5)? )
+            )$}x,
+            $name
+        );
+
+        return;
+    };
+}
+
+sub user_name {
+    sub {
+        my ( $got, $name ) = @_;
+        Test::More::like( $got, qr/^[a-zA-Z][a-zA-Z0-9]{0,9}$/, $name );
+        return;
+    };
+}
+
+sub user_rank {
+    sub {
+        my ( $got, $name ) = @_;
+
+        Test::More::like(
+            $got,
+            qr{^(?:
+                \-
+              | \?
+              | [1-9](?:p|d\??|k\??)
+              | [12][0-9]k\??
+              | 30k\??
+            )$}x,
+            $name
+        );
+
         return;
     };
 }

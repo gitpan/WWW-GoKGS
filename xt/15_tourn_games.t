@@ -1,48 +1,75 @@
 use strict;
 use warnings;
 use xt::Util qw/:cmp_deeply/;
+use Path::Class qw/file/;
 use Test::More;
 use WWW::GoKGS::Scraper::TournGames;
 
-if ( $ENV{AUTHOR_TESTING} ) {
+plan skip_all => 'AUTHOR_TESTING is required' unless $ENV{AUTHOR_TESTING};
+plan tests => 2;
+
+subtest 'relaxed' => sub {
     plan tests => 1;
-}
-else {
-    plan skip_all => 'AUTHOR_TESTING is required';
-}
 
-my $tourn_games = WWW::GoKGS::Scraper::TournGames->new;
-my $got = $tourn_games->query( id => 879, round => 1 );
+    my $tourn_games = WWW::GoKGS::Scraper::TournGames->new;
 
-my %user = (
-    name => sub { /^[a-zA-Z][a-zA-Z0-9]{0,9}$/ },
-    rank => sub { /^(?:\-|\?|[1-9](?:p|d\??|k\??)|[12][0-9]k\??|30k\??)$/ },
-);
+    my $got = $tourn_games->query(
+        id => 879,
+        round => 1,
+    );
 
-cmp_deeply $got, hash(
-    name => sub { defined },
-    round => [ integer(), sub { $_[0] >= 1 } ],
-    games => array(hash(
-        sgf_uri => [ uri(), sub { $_[0]->path =~ /\.sgf$/ } ],
-        black => hash( %user ),
-        white => hash( %user ),
-        board_size => [ integer(), sub { $_[0] >= 2 && $_[0] <= 38 } ],
-        handicap => [ integer(), sub { $_[0] >= 2 } ],
-        start_time => datetime( '%Y-%m-%dT%H:%MZ' ),
-        result => sub { /^(?:Unfinished|Draw|(?:B|W)\+(?:Resign|Forfeit|Time|\d+(?:\.\d+)?))$/ },
-    )),
-    byes => array(hash(
-        %user,
-        type => sub { /^(?:System|No show|Requested)$/ },
-    )),
-    next_round_uri => [ uri(), sub { $_[0]->path eq '/tournGames.jsp' } ],
-    previous_round_uri => [ uri(), sub { $_[0]->path eq '/tournGames.jsp' } ],
-    links => hash(
-        rounds => array(hash(
-            round => [ integer(), sub { $_[0] >= 1 } ],
+    my %user = (
+        name => user_name(),
+        rank => user_rank(),
+    );
+
+    my $expected = hash(
+        name => sub { defined },
+        round => [ integer(), sub { $_[0] >= 1 } ],
+        games => array(hash(
+            sgf_uri => [ uri(), sub { $_[0]->path =~ /\.sgf$/ } ],
+            black => hash( %user ),
+            white => hash( %user ),
+            board_size => [ integer(), sub { $_[0] >= 2 && $_[0] <= 38 } ],
+            handicap => [ integer(), sub { $_[0] >= 2 } ],
             start_time => datetime( '%Y-%m-%dT%H:%MZ' ),
-            end_time => datetime( '%Y-%m-%dT%H:%MZ' ),
-            uri => [ uri(), sub { $_[0]->path eq '/tournGames.jsp' } ],
+            result => game_result(),
         )),
-    ),
-);
+        byes => array(hash(
+            %user,
+            type => sub { /^(?:System|No show|Requested)$/ },
+        )),
+        previous_round_uri => [ uri(), sub { $_[0]->path eq '/tournGames.jsp' } ],
+        next_round_uri => [ uri(), sub { $_[0]->path eq '/tournGames.jsp' } ],
+        links => hash(
+            rounds => array(hash(
+                round => [ integer(), sub { $_[0] >= 1 } ],
+                start_time => datetime( '%Y-%m-%dT%H:%MZ' ),
+                end_time => datetime( '%Y-%m-%dT%H:%MZ' ),
+                uri => [ uri(), sub { $_[0]->path eq '/tournGames.jsp' } ],
+            )),
+        ),
+    );
+
+    cmp_deeply $got, $expected, 'id=879&round=1';
+};
+
+subtest 'paranoid' => sub {
+    plan tests => 1;
+
+    my $tourn_games = WWW::GoKGS::Scraper::TournGames->new;
+
+    my $got = $tourn_games->query(
+        id => 488,
+        round => 1,
+    );
+
+    my $expected = do +file(
+        'xt',
+        'data',
+        'TournGames',
+        '20140616-id-488-round-1.pl',
+    );
+
+    is_deeply $got, $expected, 'id=488&round=1';
+};
