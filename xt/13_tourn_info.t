@@ -21,12 +21,12 @@ subtest 'relaxed' => sub {
         name => sub { defined },
         description => sub { defined },
         links => hash(
-            rounds => array(hash(
+            rounds => array_of_hashes(
                 round => [ integer(), sub { $_[0] >= 1 } ],
                 start_time => datetime( '%Y-%m-%dT%H:%MZ' ),
                 end_time => datetime( '%Y-%m-%dT%H:%MZ' ),
                 uri => [ uri(), sub { $_[0]->path eq '/tournGames.jsp' } ],
-            )),
+            ),
         ),
     );
 

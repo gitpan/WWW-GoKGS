@@ -26,7 +26,7 @@ subtest 'relaxed' => sub {
     my $expected = hash(
         name => sub { defined },
         round => [ integer(), sub { $_[0] >= 1 } ],
-        games => array(hash(
+        games => array_of_hashes(
             sgf_uri => [ uri(), sub { $_[0]->path =~ /\.sgf$/ } ],
             black => hash( %user ),
             white => hash( %user ),
@@ -34,20 +34,20 @@ subtest 'relaxed' => sub {
             handicap => [ integer(), sub { $_[0] >= 2 } ],
             start_time => datetime( '%Y-%m-%dT%H:%MZ' ),
             result => game_result(),
-        )),
-        byes => array(hash(
+        ),
+        byes => array_of_hashes(
             %user,
             type => sub { /^(?:System|No show|Requested)$/ },
-        )),
+        ),
         previous_round_uri => [ uri(), sub { $_[0]->path eq '/tournGames.jsp' } ],
         next_round_uri => [ uri(), sub { $_[0]->path eq '/tournGames.jsp' } ],
         links => hash(
-            rounds => array(hash(
+            rounds => array_of_hashes(
                 round => [ integer(), sub { $_[0] >= 1 } ],
                 start_time => datetime( '%Y-%m-%dT%H:%MZ' ),
                 end_time => datetime( '%Y-%m-%dT%H:%MZ' ),
                 uri => [ uri(), sub { $_[0]->path eq '/tournGames.jsp' } ],
-            )),
+            ),
         ),
     );
 

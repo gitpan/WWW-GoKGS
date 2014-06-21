@@ -14,27 +14,27 @@ subtest 'relaxed' => sub {
     my $tourn_entrants = WWW::GoKGS::Scraper::TournEntrants->new;
 
     my $links = hash(
-        rounds => array(hash(
+        rounds => array_of_hashes(
             round => [ integer(), sub { $_[0] >= 1 } ],
             start_time => datetime( '%Y-%m-%dT%H:%MZ' ),
             end_time => datetime( '%Y-%m-%dT%H:%MZ' ),
             uri => [ uri(), sub { $_[0]->path eq '/tournGames.jsp' } ],
-        )),
+        ),
     );
 
     my $single_or_double_elimination = hash(
         name => sub { defined },
-        entrants => array(hash(
+        entrants => array_of_hashes(
             name => user_name(),
             rank => user_rank(),
             standing => sub { defined },
-        )),
+        ),
         links => $links,
     );
 
     my $swiss_or_mcmahon = hash(
         name => sub { defined },
-        entrants => array(hash(
+        entrants => array_of_hashes(
             position => [ integer(), sub { $_[0] >= 1 } ],
             name => user_name(),
             rank => user_rank(),
@@ -42,19 +42,19 @@ subtest 'relaxed' => sub {
             sos => [ real(), sub { $_[0] >= 0 } ],
             sodos => [ real(), sub { $_[0] >= 0 } ],
             notes => sub { defined },
-        )),
+        ),
         links => $links,
     );
 
     my $round_robin = hash(
         name => sub { defined },
-        entrants => array(hash(
+        entrants => array_of_hashes(
             position => [ integer(), sub { $_[0] >= 1 } ],
             name => user_name(),
             rank => user_rank(),
             score => [ real(), sub { $_[0] >= 0 } ],
             notes => sub { defined },
-        )),
+        ),
         results => hash(),
         links => $links,
     );

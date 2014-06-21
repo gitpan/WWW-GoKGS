@@ -265,6 +265,20 @@ WRITING SCRAPERS
       __PACKAGE__->mk_accessors( '/fooBar.jsp' );
       sub _build_foo_bar { WWW::GoKGS::Scraper::FooBar->new }
 
+ENVIRONMENTAL VARIABLES
+    AUTHOR_TESTING
+        Some tests for scrapers send HTTP requests to "GET" resources on
+        KGS. When you run "./Build test", they are skipped by default to
+        avoid overloading the KGS server. To run those tests, you have to
+        set "AUTHOR_TESTING" to true explicitly:
+
+          $ perl Build.PL
+          $ env AUTHOR_TESTING=1 ./Build test
+
+        Author tests are run by Travis CI
+        <https://travis-ci.org/anazawa/p5-WWW-GoKGS> once a day. You can
+        visit the website to check whether the tests passed or not.
+
 ACKNOWLEDGEMENT
     Thanks to wms, the author of KGS Go Server, we can enjoy playing go
     online for free.

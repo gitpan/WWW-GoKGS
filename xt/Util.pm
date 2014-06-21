@@ -8,7 +8,7 @@ our %EXPORT_TAGS = (
     cmp_deeply => [qw(
         cmp_deeply
         hash
-        array
+        array_of_hashes
         uri
         integer
         real
@@ -63,8 +63,8 @@ sub hash {
     };
 }
 
-sub array {
-    my $expected = shift;
+sub array_of_hashes {
+    my $expected = hash( @_ );
 
     sub {
         my $got = shift;

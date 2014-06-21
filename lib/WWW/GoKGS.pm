@@ -14,7 +14,7 @@ use WWW::GoKGS::Scraper::TournGames;
 use WWW::GoKGS::Scraper::TournInfo;
 use WWW::GoKGS::Scraper::TournList;
 
-our $VERSION = '0.10';
+our $VERSION = '0.11';
 
 __PACKAGE__->mk_accessors(
     '/gameArchives.jsp',
@@ -24,6 +24,83 @@ __PACKAGE__->mk_accessors(
     '/tournEntrants.jsp',
     '/tournGames.jsp',
 );
+
+sub _build_game_archives {
+    my $self = shift;
+
+    my $game_archives = WWW::GoKGS::Scraper::GameArchives->new(
+        user_agent => $self->user_agent,
+    );
+
+    $game_archives->add_filter(
+        'games[].start_time' => $self->date_filter,
+    );
+
+    $game_archives;
+}
+
+sub _build_top_100 {
+    my $self = shift;
+
+    WWW::GoKGS::Scraper::Top100->new(
+        user_agent => $self->user_agent,
+    );
+}
+
+sub _build_tourn_list {
+    my $self = shift;
+
+    WWW::GoKGS::Scraper::TournList->new(
+        user_agent => $self->user_agent,
+    );
+}
+
+sub _build_tourn_info {
+    my $self = shift;
+
+    my $tourn_info = WWW::GoKGS::Scraper::TournInfo->new(
+        user_agent => $self->user_agent,
+    );
+
+    $tourn_info->add_filter(
+        'description' => $self->html_filter,
+        'links.rounds[].start_time' => $self->date_filter,
+        'links.rounds[].end_time'   => $self->date_filter,
+    );
+
+    $tourn_info;
+}
+
+sub _build_tourn_entrants {
+    my $self = shift;
+
+    my $tourn_entrants = WWW::GoKGS::Scraper::TournEntrants->new(
+        user_agent => $self->user_agent,
+    );
+
+    $tourn_entrants->add_filter(
+        'links.rounds[].start_time' => $self->date_filter,
+        'links.rounds[].end_time'   => $self->date_filter,
+    );
+
+    $tourn_entrants;
+}
+
+sub _build_tourn_games {
+    my $self = shift;
+
+    my $tourn_games = WWW::GoKGS::Scraper::TournGames->new(
+        user_agent => $self->user_agent,
+    );
+
+    $tourn_games->add_filter(
+        'games[].start_time' => $self->date_filter,
+        'links.rounds[].start_time' => $self->date_filter,
+        'links.rounds[].end_time'   => $self->date_filter,
+    );
+
+    $tourn_games;
+}
 
 sub mk_accessors {
     my ( $class, @paths ) = @_;
@@ -140,83 +217,6 @@ sub set_scraper {
     }
 
     return;
-}
-
-sub _build_game_archives {
-    my $self = shift;
-
-    my $game_archives = WWW::GoKGS::Scraper::GameArchives->new(
-        user_agent => $self->user_agent,
-    );
-
-    $game_archives->add_filter(
-        'games[].start_time' => $self->date_filter,
-    );
-
-    $game_archives;
-}
-
-sub _build_top_100 {
-    my $self = shift;
-
-    WWW::GoKGS::Scraper::Top100->new(
-        user_agent => $self->user_agent,
-    );
-}
-
-sub _build_tourn_list {
-    my $self = shift;
-
-    WWW::GoKGS::Scraper::TournList->new(
-        user_agent => $self->user_agent,
-    );
-}
-
-sub _build_tourn_info {
-    my $self = shift;
-
-    my $tourn_info = WWW::GoKGS::Scraper::TournInfo->new(
-        user_agent => $self->user_agent,
-    );
-
-    $tourn_info->add_filter(
-        'description' => $self->html_filter,
-        'links.rounds[].start_time' => $self->date_filter,
-        'links.rounds[].end_time'   => $self->date_filter,
-    );
-
-    $tourn_info;
-}
-
-sub _build_tourn_entrants {
-    my $self = shift;
-
-    my $tourn_entrants = WWW::GoKGS::Scraper::TournEntrants->new(
-        user_agent => $self->user_agent,
-    );
-
-    $tourn_entrants->add_filter(
-        'links.rounds[].start_time' => $self->date_filter,
-        'links.rounds[].end_time'   => $self->date_filter,
-    );
-
-    $tourn_entrants;
-}
-
-sub _build_tourn_games {
-    my $self = shift;
-
-    my $tourn_games = WWW::GoKGS::Scraper::TournGames->new(
-        user_agent => $self->user_agent,
-    );
-
-    $tourn_games->add_filter(
-        'games[].start_time' => $self->date_filter,
-        'links.rounds[].start_time' => $self->date_filter,
-        'links.rounds[].end_time'   => $self->date_filter,
-    );
-
-    $tourn_games;
 }
 
 sub scrape {
@@ -569,6 +569,25 @@ but also can add the scraper object to C<WWW::GoKGS> object as follows:
   use parent 'WWW::GoKGS';
   __PACKAGE__->mk_accessors( '/fooBar.jsp' );
   sub _build_foo_bar { WWW::GoKGS::Scraper::FooBar->new }
+
+=head1 ENVIRONMENTAL VARIABLES
+
+=over 4
+
+=item AUTHOR_TESTING
+
+Some tests for scrapers send HTTP requests to C<GET> resources on KGS.
+When you run C<./Build test>, they are skipped by default
+to avoid overloading the KGS server. To run those tests,
+you have to set C<AUTHOR_TESTING> to true explicitly:
+
+  $ perl Build.PL
+  $ env AUTHOR_TESTING=1 ./Build test
+
+Author tests are run by L<Travis CI|https://travis-ci.org/anazawa/p5-WWW-GoKGS>
+once a day. You can visit the website to check whether the tests passed or not.
+
+=back
 
 =head1 ACKNOWLEDGEMENT
 

@@ -12,20 +12,21 @@ subtest 'relaxed' => sub {
     plan tests => 1;
 
     my $tourn_list = WWW::GoKGS::Scraper::TournList->new;
+
     my $got = $tourn_list->query;
 
     my $expected = hash(
-        tournaments => array(hash(
+        tournaments => array_of_hashes(
             name => sub { defined },
             uri => [ uri(), sub { $_[0]->path eq '/tournInfo.jsp' } ],
-        )),
-        year_index => array(hash(
+        ),
+        year_index => array_of_hashes(
             year => [ integer(), sub { $_[0] >= 2001 } ],
             uri => [ uri(), sub { $_[0]->path eq '/tournList.jsp' } ],
-        )),
+        ),
     );
 
-    cmp_deeply $got, $expected, 'latest';
+    cmp_deeply $got, $expected, 'no arguments';
 };
 
 subtest 'paranoid' => sub {
