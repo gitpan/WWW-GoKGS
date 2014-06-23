@@ -92,10 +92,12 @@ subtest 'WWW::GoKGS::Scraper::TournGames' => sub {
 };
 
 subtest 'WWW::GoKGS' => sub {
-    my $gokgs = WWW::GoKGS->new;
+    my $gokgs = WWW::GoKGS->new(
+        from => 'user@example.com',
+    );
 
     isa_ok $gokgs, 'WWW::GoKGS';
-    isa_ok $gokgs->user_agent, 'LWP::UserAgent';
+    isa_ok $gokgs->user_agent, 'LWP::RobotUA';
     isa_ok $gokgs->date_filter, 'CODE';
     isa_ok $gokgs->html_filter, 'CODE';
     isa_ok $gokgs->game_archives, 'WWW::GoKGS::Scraper::GameArchives';

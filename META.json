@@ -30,7 +30,7 @@
          "requires" : {
             "Carp" : "0",
             "Exporter" : "0",
-            "LWP::UserAgent" : "0",
+            "LWP::RobotUA" : "0",
             "Scalar::Util" : "0",
             "String::CamelCase" : "0",
             "URI" : "1.59",
@@ -51,7 +51,7 @@
    "provides" : {
       "WWW::GoKGS" : {
          "file" : "lib/WWW/GoKGS.pm",
-         "version" : "0.11"
+         "version" : "0.12"
       },
       "WWW::GoKGS::Scraper" : {
          "file" : "lib/WWW/GoKGS/Scraper.pm"
@@ -90,5 +90,5 @@
          "url" : "git://github.com/anazawa/p5-WWW-GoKGS.git"
       }
    },
-   "version" : "0.11"
+   "version" : "0.12"
 }

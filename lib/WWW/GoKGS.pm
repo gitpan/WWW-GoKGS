@@ -3,7 +3,7 @@ use 5.008_009;
 use strict;
 use warnings;
 use Carp qw/croak/;
-use LWP::UserAgent;
+use LWP::RobotUA;
 use Scalar::Util qw/blessed/;
 use String::CamelCase qw/decamelize/;
 use URI;
@@ -14,7 +14,7 @@ use WWW::GoKGS::Scraper::TournGames;
 use WWW::GoKGS::Scraper::TournInfo;
 use WWW::GoKGS::Scraper::TournList;
 
-our $VERSION = '0.11';
+our $VERSION = '0.12';
 
 __PACKAGE__->mk_accessors(
     '/gameArchives.jsp',
@@ -174,9 +174,14 @@ sub user_agent {
 sub _build_user_agent {
     my $self = shift;
 
-    LWP::UserAgent->new(
-        agent => ref $self . '/' . $self->VERSION,
+    LWP::RobotUA->new(
+        agent => sprintf( '%s/%s', ref $self, $self->VERSION ),
+        from => $self->from,
     );
+}
+
+sub from {
+    $_[0]->{from};
 }
 
 sub date_filter {
@@ -258,7 +263,9 @@ WWW::GoKGS - KGS Go Server (http://www.gokgs.com/) Scraper
 
   use WWW::GoKGS;
 
-  my $gokgs = WWW::GoKGS->new;
+  my $gokgs = WWW::GoKGS->new(
+      from => 'user@example.com'
+  );
 
   # Game archives
   my $game_archives_1 = $gokgs->scrape( '/gameArchives.jsp?user=foo' );
@@ -319,10 +326,28 @@ L<WWW::GoKGS::Scraper::TournGames>.
 
 =over 4
 
+=item $email_address = $gokgs->from : Required
+
+Returns your email address which is used to construct L<LWP::RobotUA> object.
+The email address is used to generate the From request header
+which indicates who is making the request.
+This attribute is required and read-only.
+
+  my $gokgs = WWW::GoKGS->new(
+      from => 'user@example.com' # used to construct LWP::RobotUA
+  );
+
 =item $UserAgent = $gokgs->user_agent
 
-Returns an L<LWP::UserAgent> object which is used to C<GET> the requested
-resource. This attribute is read-only.
+Returns a user agent object which is used to C<GET> the requested
+resource. Defaults to L<LWP::RobotUA> object which consults
+C<http://www.gokgs.com/robots.txt> before sending HTTP requests.
+
+NOTE: C<LWP::RobotUA> fails to read C</robots.txt>
+since the KGS web server doesn't returns the Content-Type response header
+as of June 23rd, 2014. This module can not solve this problem.
+
+You can also set your own user agent object as follows:
 
   use LWP::UserAgent;
 
@@ -332,6 +357,11 @@ resource. This attribute is read-only.
       )
   );
 
+NOTE: You should set a delay between requests to avoid overloading
+the KGS server.
+
+This attribute is read-only.
+
 =item $CodeRef = $gokgs->html_filter
 
 Returns an HTML filter. Defaults to an anonymous subref which just returns
@@ -340,6 +370,7 @@ an HTML string. The return value is used as the filtered value.
 This attribute is read-only.
 
   my $gokgs = WWW::GoKGS->new(
+      from => 'user@example.com',
       html_filter => sub {
           my $html = shift;
           $html =~ s/<.*?>//g; # strip HTML tags
@@ -357,6 +388,7 @@ the filtered value. This attribute is read-only.
   use Time::Piece qw/gmtime/;
 
   my $gokgs = WWW::GoKGS->new(
+      from => 'user@example.com',
       date_filter => sub {
           my $date = shift; # => "2014-05-17T19:05Z"
           gmtime->strptime( $date, '%Y-%m-%dT%H:%MZ' );
@@ -501,7 +533,7 @@ call.
   $gokgs->set_scraper(
       '/fooBar.jsp' => WWW::GoKGS::Scraper::FooBar->new,
       '/barBaz.jsp' => scraper {
-           process '.bar', baz => 'TEXT;
+           process '.bar', baz => 'TEXT';
            ...
       }
   );
