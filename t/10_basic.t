@@ -108,6 +108,9 @@ subtest 'WWW::GoKGS' => sub {
     isa_ok $gokgs->tourn_games, 'WWW::GoKGS::Scraper::TournGames';
     can_ok $gokgs, qw( get_scraper set_scraper scrape );
 
+    is $gokgs->from, 'user@example.com';
+    like $gokgs->agent, qr{^WWW::GoKGS/\d\.\d\d$};
+
     throws_ok {
         $gokgs->set_scraper( '/fooBar.jsp' );
     } qr{^Odd number of arguments passed to 'set_scraper'};

@@ -1,5 +1,11 @@
 Revision history for Perl extension WWW::GoKGS.
 
+0.13 Jun 24th, 2014
+
+  - WWW::GoKGS#user_agent, #from, #date_filter and #html_filter
+    become 'rw'
+  - Add WWW::GoKGS#agent
+
 0.12 Jun 23rd, 2014
 
   - WWW::GoKGS#user_agent defaults to LWP::RobotUA

@@ -14,7 +14,7 @@ use WWW::GoKGS::Scraper::TournGames;
 use WWW::GoKGS::Scraper::TournInfo;
 use WWW::GoKGS::Scraper::TournList;
 
-our $VERSION = '0.12';
+our $VERSION = '0.13';
 
 __PACKAGE__->mk_accessors(
     '/gameArchives.jsp',
@@ -27,13 +27,10 @@ __PACKAGE__->mk_accessors(
 
 sub _build_game_archives {
     my $self = shift;
-
-    my $game_archives = WWW::GoKGS::Scraper::GameArchives->new(
-        user_agent => $self->user_agent,
-    );
+    my $game_archives = WWW::GoKGS::Scraper::GameArchives->new;
 
     $game_archives->add_filter(
-        'games[].start_time' => $self->date_filter,
+        'games[].start_time' => $self->wrapped_date_filter,
     );
 
     $game_archives;
@@ -41,31 +38,22 @@ sub _build_game_archives {
 
 sub _build_top_100 {
     my $self = shift;
-
-    WWW::GoKGS::Scraper::Top100->new(
-        user_agent => $self->user_agent,
-    );
+    WWW::GoKGS::Scraper::Top100->new;
 }
 
 sub _build_tourn_list {
     my $self = shift;
-
-    WWW::GoKGS::Scraper::TournList->new(
-        user_agent => $self->user_agent,
-    );
+    WWW::GoKGS::Scraper::TournList->new;
 }
 
 sub _build_tourn_info {
     my $self = shift;
-
-    my $tourn_info = WWW::GoKGS::Scraper::TournInfo->new(
-        user_agent => $self->user_agent,
-    );
+    my $tourn_info = WWW::GoKGS::Scraper::TournInfo->new;
 
     $tourn_info->add_filter(
-        'description' => $self->html_filter,
-        'links.rounds[].start_time' => $self->date_filter,
-        'links.rounds[].end_time'   => $self->date_filter,
+        'description' => $self->wrapped_html_filter,
+        'links.rounds[].start_time' => $self->wrapped_date_filter,
+        'links.rounds[].end_time'   => $self->wrapped_date_filter,
     );
 
     $tourn_info;
@@ -73,14 +61,11 @@ sub _build_tourn_info {
 
 sub _build_tourn_entrants {
     my $self = shift;
-
-    my $tourn_entrants = WWW::GoKGS::Scraper::TournEntrants->new(
-        user_agent => $self->user_agent,
-    );
+    my $tourn_entrants = WWW::GoKGS::Scraper::TournEntrants->new;
 
     $tourn_entrants->add_filter(
-        'links.rounds[].start_time' => $self->date_filter,
-        'links.rounds[].end_time'   => $self->date_filter,
+        'links.rounds[].start_time' => $self->wrapped_date_filter,
+        'links.rounds[].end_time'   => $self->wrapped_date_filter,
     );
 
     $tourn_entrants;
@@ -88,15 +73,12 @@ sub _build_tourn_entrants {
 
 sub _build_tourn_games {
     my $self = shift;
-
-    my $tourn_games = WWW::GoKGS::Scraper::TournGames->new(
-        user_agent => $self->user_agent,
-    );
+    my $tourn_games = WWW::GoKGS::Scraper::TournGames->new;
 
     $tourn_games->add_filter(
-        'games[].start_time' => $self->date_filter,
-        'links.rounds[].start_time' => $self->date_filter,
-        'links.rounds[].end_time'   => $self->date_filter,
+        'games[].start_time' => $self->wrapped_date_filter,
+        'links.rounds[].start_time' => $self->wrapped_date_filter,
+        'links.rounds[].end_time'   => $self->wrapped_date_filter,
     );
 
     $tourn_games;
@@ -142,7 +124,7 @@ sub make_accessor {
             if ( @_ ) {
                 $self->set_scraper( $path => shift );
             }
-            elsif ( $self->_has_scraper($path) ) {
+            elsif ( exists $self->_scrapers->{$path} ) {
                 $self->get_scraper( $path );
             }
             else {
@@ -168,57 +150,107 @@ sub new {
 
 sub user_agent {
     my $self = shift;
-    $self->{user_agent} ||= $self->_build_user_agent;
+
+    if ( @_ ) {
+        $self->{user_agent} = shift;
+        for my $scraper ( values %{$self->_scrapers} ) {
+            $scraper->user_agent( $self->{user_agent} ); # overwrite
+        }
+    }
+    elsif ( exists $self->{user_agent} ) {
+        $self->{user_agent};
+    }
+    else {
+        $self->{user_agent} = $self->_build_user_agent;
+    }
 }
 
 sub _build_user_agent {
     my $self = shift;
 
     LWP::RobotUA->new(
-        agent => sprintf( '%s/%s', ref $self, $self->VERSION ),
+        agent => $self->agent,
         from => $self->from,
     );
 }
 
+sub agent {
+    my $self = shift;
+
+    if ( exists $self->{user_agent} ) {
+        $self->user_agent->agent( @_ );
+    }
+    elsif ( @_ ) {
+        $self->{agent} = shift;
+    }
+    else {
+        $self->{agent} ||= $self->_build_agent;
+    }
+}
+
+sub _build_agent {
+    my $self = shift;
+    sprintf '%s/%s', ref $self, $self->VERSION;
+}
+
 sub from {
-    $_[0]->{from};
+    my $self = shift;
+
+    if ( exists $self->{user_agent} ) {
+        $self->user_agent->from( @_ );
+    }
+    elsif ( @_ ) {
+        $self->{from} = shift;
+    }
+    else {
+        $self->{from};
+    }
 }
 
 sub date_filter {
-    $_[0]->{date_filter} ||= sub { $_[0] };
+    my $self = shift;
+    $self->{date_filter} = shift if @_;
+    $self->{date_filter} ||= sub { $_[0] };
 }
 
 sub html_filter {
-    $_[0]->{html_filter} ||= sub { $_[0] };
+    my $self = shift;
+    $self->{html_filter} = shift if @_;
+    $self->{html_filter} ||= sub { $_[0] };
 }
 
-sub _scraper {
-    $_[0]->{scraper} ||= {};
+sub wrapped_date_filter {
+    my $self = shift;
+    sub { $self->date_filter->(@_) };
+}
+
+sub wrapped_html_filter {
+    my $self = shift;
+    sub { $self->html_filter->(@_) };
+}
+
+sub _scrapers {
+    $_[0]->{_scrapers} ||= {};
 }
 
 sub get_scraper {
     my ( $self, $path ) = @_;
-    $self->_scraper->{$path};
-}
-
-sub _has_scraper {
-    my ( $self, $path ) = @_;
-    exists $self->_scraper->{$path};
+    $self->_scrapers->{$path};
 }
 
 sub set_scraper {
     my ( $self, @pairs ) = @_;
-    my $scraper = $self->_scraper;
+    my $scrapers = $self->_scrapers;
 
     croak "Odd number of arguments passed to 'set_scraper'" if @pairs % 2;
 
-    while ( my ($key, $value) = splice @pairs, 0, 2 ) {
-        if ( blessed $value and $value->can('scrape') ) {
-            $scraper->{$key} = $value;
-        }
-        else {
-            croak "$value ($key scraper) is missing 'scrape' method";
-        }
+    while ( my ($path, $scraper) = splice @pairs, 0, 2 ) {
+        croak "$scraper ($path scraper) is missing 'scrape' method"
+            unless blessed $scraper and $scraper->can('scrape');
+        croak "$scraper ($path scraper) is missing 'user_agent' method"
+            unless $scraper->can('user_agent');
+        $scraper->user_agent( $self->user_agent ); # overwrite
+        $scrapers->{$path} = $scraper;
     }
 
     return;
@@ -326,22 +358,14 @@ L<WWW::GoKGS::Scraper::TournGames>.
 
 =over 4
 
-=item $email_address = $gokgs->from : Required
-
-Returns your email address which is used to construct L<LWP::RobotUA> object.
-The email address is used to generate the From request header
-which indicates who is making the request.
-This attribute is required and read-only.
-
-  my $gokgs = WWW::GoKGS->new(
-      from => 'user@example.com' # used to construct LWP::RobotUA
-  );
-
 =item $UserAgent = $gokgs->user_agent
 
-Returns a user agent object which is used to C<GET> the requested
-resource. Defaults to L<LWP::RobotUA> object which consults
-C<http://www.gokgs.com/robots.txt> before sending HTTP requests.
+=item $gokgs->user_agent( LWP::RoboUA->new(...) )
+
+Can be used to get or set a user agent object which is used to C<GET>
+the requested resource. Defaults to L<LWP::RobotUA> object which consults
+C<http://www.gokgs.com/robots.txt> before sending HTTP requests,
+and also sets a proper delay between requests.
 
 NOTE: C<LWP::RobotUA> fails to read C</robots.txt>
 since the KGS web server doesn't returns the Content-Type response header
@@ -360,40 +384,57 @@ You can also set your own user agent object as follows:
 NOTE: You should set a delay between requests to avoid overloading
 the KGS server.
 
-This attribute is read-only.
+=item $email_address = $gokgs->from
+
+=item $gokgs->from( 'user@example.com' )
+
+Can be used to get or set your email address which is used 
+by C<< $gokgs->user_agent >> to send the From request header
+that indicates who is making the request. This attribute must be defined
+when you use L<LWP::RobotUA>.
+
+  my $gokgs = WWW::GoKGS->new(
+      from => 'user@example.com'
+  );
+
+=item $product_id = $gokgs->agent
+
+=item $gokgs->agent( 'MyAgent/0.01' )
+
+Can be used to get or set the product token that is used by
+C<< $gokgs->user_agent >> to send the User-Agent request header.
+Defaults to C<WWW::GoKGS/#.##>, where C<#.##> is substituted with
+the version number of this module.
 
 =item $CodeRef = $gokgs->html_filter
 
-Returns an HTML filter. Defaults to an anonymous subref which just returns
-the given argument (C<sub { $_[0] }>). The callback is called with
-an HTML string. The return value is used as the filtered value.
-This attribute is read-only.
+=item $gokgs->html_filter( sub { my $html = shift; ... } )
 
-  my $gokgs = WWW::GoKGS->new(
-      from => 'user@example.com',
-      html_filter => sub {
-          my $html = shift;
-          $html =~ s/<.*?>//g; # strip HTML tags
-          $html;
-      }
-  );
+Can be used to get or set an HTML filter. Defaults to an anonymous subref
+which just returns the given argument (C<sub { $_[0] }>). The callback is
+called with an HTML string. The return value is used as the filtered value.
+
+  $gokgs->html_filter(sub {
+      my $html = shift;
+      $html =~ s/<.*?>//g; # strip HTML tags
+      $html;
+  });
 
 =item $CodeRef = $gokgs->date_filter
 
-Returns a date filter. Defaults to an anonymous subref which just returns
-the given argument (C<sub { $_[0] }>). The callback is called with
-a date string such as C<2014-05-17T19:05Z>. The return value is used as
-the filtered value. This attribute is read-only.
+=item $gokgs->date_filter( sub { my $date = shift; ... } )
+
+Can be used to get or set a date filter. Defaults to an anonymous subref
+which just returns the given argument (C<sub { $_[0] }>). The callback is
+called with a date string such as C<2014-05-17T19:05Z>. The return value is
+used as the filtered value.
 
   use Time::Piece qw/gmtime/;
 
-  my $gokgs = WWW::GoKGS->new(
-      from => 'user@example.com',
-      date_filter => sub {
-          my $date = shift; # => "2014-05-17T19:05Z"
-          gmtime->strptime( $date, '%Y-%m-%dT%H:%MZ' );
-      }
-  );
+  $gokgs->date_filter(sub {
+      my $date = shift; # => "2014-05-17T19:05Z"
+      gmtime->strptime( $date, '%Y-%m-%dT%H:%MZ' );
+  });
 
 =item $GameArchives = $gokgs->game_archives
 
