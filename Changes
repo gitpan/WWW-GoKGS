@@ -1,5 +1,22 @@
 Revision history for Perl extension WWW::GoKGS.
 
+0.14 Jun 26th, 2014
+
+  - Add the following instance methods:
+      * can_scrape
+      * each_scraper
+  - Add the following class methods:
+      * known_paths
+
+  [INCOMPATIBLE CHANGES]
+
+    - Scraper objects are not built lazily anymore,
+      but are built when WWW::GoKGS object is created
+    - Must pass a path included by known_paths() to mk_accessors()
+    - #user_agent doesn't overwrite #user_agent attributes of
+      all the scraper objects as a side effect anymore. You have to overwrite
+      them explicitly by yourself.
+
 0.13 Jun 24th, 2014
 
   - WWW::GoKGS#user_agent, #from, #date_filter and #html_filter

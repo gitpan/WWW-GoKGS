@@ -66,12 +66,13 @@ DESCRIPTION
         server doesn't returns the Content-Type response header as of June
         23rd, 2014. This module can not solve this problem.
 
-        You can also set your own user agent object as follows:
+        You can also set your own user agent object which inherits from
+        LWP::UserAgent as follows:
 
           use LWP::UserAgent;
 
-          my $gokgs = WWW::GoKGS->new(
-              user_agent => LWP::UserAgent->new(
+          $gokgs->user_agent(
+              LWP::UserAgent->new(
                   agent => 'MyAgent/1.00'
               )
           );
@@ -160,6 +161,11 @@ DESCRIPTION
         object.
 
   INSTANCE METHODS
+    $bool = $gokgs->can_scrape( '/fooBar.jsp' )
+    $bool = $gokgs->can_scrape( 'http://www.gokgs.com/fooBar.jsp' )
+        Returns a Boolean value telling whether $gokgs can "scrape" the
+        resource specified by the given path.
+
     $HashRef = $gokgs->scrape( '/gameArchives.jsp?user=foo' )
     $HashRef = $gokgs->scrape(
     'http://www.gokgs.com/gameArchives.jsp?user=foo' )
@@ -243,11 +249,42 @@ DESCRIPTION
               }
           );
 
+    $gokgs->each_scraper( sub { my ($path, $scraper) = @_; ... } )
+        Given a subref, applies the subroutine to each scraper object in
+        turn. The callback routine is called with two parameters; the path
+        to the resource on KGS and the scraper object which can scrape the
+        resource.
+
+          $gokgs->each_scraper(sub {
+              my $path = shift; # => "/gameArchives.jsp"
+              my $scraper = shift; # isa WWW::GoKGS::Scraper::GameArchives
+
+              # overwrite "user_agent" attributes of all the scraper objects
+              $scraper->user_agent( $gokgs->user_agent );
+          });
+
   CLASS METHODS
+    @paths = $class->known_paths
+        Returns an incomplete list of paths to KGS resources. You can add a
+        new path by subclassing or sending a patch to the module author.
+
+          my @paths = WWW::GoKGS->known_paths;
+          # => (
+          #    "/graphPage.jsp",
+          #    "/gameArchives.jsp",
+          #    "/plusSchedule.jsp",
+          #    "/top100.jsp",
+          #    "/tournEntrants.jsp",
+          #    "/tournGames.jsp",
+          #    "/tournInfo.jsp",
+          #    "/tournList.jsp"
+          # )
+
     $class->mk_accessors( $path )
     $class->mk_accessors( @paths )
         Creates the accessor method for a scraper which can "scrape" $path.
-        You can also create multiple accessors in one "mk_accessors" call.
+        $path must be included by "$class->known_paths". You can also create
+        multiple accessors in one "mk_accessors" call.
 
           use parent 'WWW::GoKGS';
 

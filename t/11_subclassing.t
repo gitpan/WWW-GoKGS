@@ -1,11 +1,10 @@
 use strict;
 use warnings;
-use Test::More tests => 2;
+use Test::Exception;
+use Test::More tests => 4;
 
-package WWW::GoKGS::Scraper::FooBar;
+package WWW::GoKGS::Scraper::GraphPage;
 use parent qw/WWW::GoKGS::Scraper/;
-
-sub user_agent {}
 
 sub scrape {
     { foo => 'bar' };
@@ -16,17 +15,23 @@ use parent qw/WWW::GoKGS/;
 
 our $VERSION = '0.01';
 
-__PACKAGE__->mk_accessors( '/fooBar.jsp' );
+__PACKAGE__->mk_accessors( '/graphPage.jsp' );
 
-sub _build_foo_bar {
-    WWW::GoKGS::Scraper::FooBar->new;
+sub _build_graph_page {
+    WWW::GoKGS::Scraper::GraphPage->new;
 }
 
 package main;
+
+throws_ok {
+    My::WWW::GoKGS->mk_accessors( '/fooBar.jsp' );
+} qr{^Unknown path: /fooBar\.jsp};
 
 my $gokgs = My::WWW::GoKGS->new(
     from => 'user@example.com',
 );
 
-isa_ok $gokgs->foo_bar, 'WWW::GoKGS::Scraper::FooBar';
-is_deeply $gokgs->scrape( '/fooBar.jsp' ), { foo => 'bar' };
+is $gokgs->agent, 'My::WWW::GoKGS/0.01';
+
+isa_ok $gokgs->graph_page, 'WWW::GoKGS::Scraper::GraphPage';
+is_deeply $gokgs->scrape( '/graphPage.jsp' ), { foo => 'bar' };

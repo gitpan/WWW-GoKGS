@@ -6,7 +6,9 @@ use Plack::Response;
 use Try::Tiny;
 use WWW::GoKGS;
 
-my $GoKGS = WWW::GoKGS->new;
+my $GoKGS = WWW::GoKGS->new( from => 'user@example.com' );
+   $GoKGS->user_agent->delay( 1/60 );
+
 my $JSON = JSON->new->ascii->convert_blessed;
 
 my $app = sub {
@@ -25,7 +27,7 @@ my $app = sub {
                 local *URI::TO_JSON = sub {
                     my $self = shift;
 
-                    if ( $self =~ m{^http://www\.gokgs\.com/\w+\.jsp\??} ) {
+                    if ( $GoKGS->can_scrape($self) ) {
                         my $uri = $request->base;
 
                         $uri->path(do {

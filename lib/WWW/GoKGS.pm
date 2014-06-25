@@ -14,7 +14,7 @@ use WWW::GoKGS::Scraper::TournGames;
 use WWW::GoKGS::Scraper::TournInfo;
 use WWW::GoKGS::Scraper::TournList;
 
-our $VERSION = '0.13';
+our $VERSION = '0.14';
 
 __PACKAGE__->mk_accessors(
     '/gameArchives.jsp',
@@ -27,7 +27,10 @@ __PACKAGE__->mk_accessors(
 
 sub _build_game_archives {
     my $self = shift;
-    my $game_archives = WWW::GoKGS::Scraper::GameArchives->new;
+
+    my $game_archives = WWW::GoKGS::Scraper::GameArchives->new(
+        user_agent => $self->user_agent,
+    );
 
     $game_archives->add_filter(
         'games[].start_time' => $self->wrapped_date_filter,
@@ -38,17 +41,26 @@ sub _build_game_archives {
 
 sub _build_top_100 {
     my $self = shift;
-    WWW::GoKGS::Scraper::Top100->new;
+
+    WWW::GoKGS::Scraper::Top100->new(
+        user_agent => $self->user_agent,
+    );
 }
 
 sub _build_tourn_list {
     my $self = shift;
-    WWW::GoKGS::Scraper::TournList->new;
+
+    WWW::GoKGS::Scraper::TournList->new(
+        user_agent => $self->user_agent,
+    );
 }
 
 sub _build_tourn_info {
     my $self = shift;
-    my $tourn_info = WWW::GoKGS::Scraper::TournInfo->new;
+
+    my $tourn_info = WWW::GoKGS::Scraper::TournInfo->new(
+        user_agent => $self->user_agent,
+    );
 
     $tourn_info->add_filter(
         'description' => $self->wrapped_html_filter,
@@ -61,7 +73,10 @@ sub _build_tourn_info {
 
 sub _build_tourn_entrants {
     my $self = shift;
-    my $tourn_entrants = WWW::GoKGS::Scraper::TournEntrants->new;
+
+    my $tourn_entrants = WWW::GoKGS::Scraper::TournEntrants->new(
+        user_agent => $self->user_agent,
+    );
 
     $tourn_entrants->add_filter(
         'links.rounds[].start_time' => $self->wrapped_date_filter,
@@ -73,7 +88,10 @@ sub _build_tourn_entrants {
 
 sub _build_tourn_games {
     my $self = shift;
-    my $tourn_games = WWW::GoKGS::Scraper::TournGames->new;
+
+    my $tourn_games = WWW::GoKGS::Scraper::TournGames->new(
+        user_agent => $self->user_agent,
+    );
 
     $tourn_games->add_filter(
         'games[].start_time' => $self->wrapped_date_filter,
@@ -84,12 +102,30 @@ sub _build_tourn_games {
     $tourn_games;
 }
 
+sub known_paths {
+    my $class = shift;
+
+    qw(
+        /graphPage.jsp
+        /gameArchives.jsp
+        /plusSchedule.jsp
+        /top100.jsp
+        /tournEntrants.jsp
+        /tournGames.jsp
+        /tournInfo.jsp
+        /tournList.jsp
+    );
+}
+
 sub mk_accessors {
     my ( $class, @paths ) = @_;
+    my %is_known = map { $_ => 1 } $class->known_paths;
 
     for my $path ( @paths ) {
-        my $method = join '::', $class, $class->accessor_name_for( $path );
+        my $method = "$class\::" . $class->accessor_name_for( $path );
         my $body = $class->make_accessor( $path );
+        croak "Unknown path: $path" unless $is_known{$path};
+        next if defined &$method;
         no strict 'refs';
         *$method = $body;
     }
@@ -115,96 +151,58 @@ sub builder_name_for {
 
 sub make_accessor {
     my ( $class, $path ) = @_;
-    my $builder = $class->builder_name_for( $path );
 
-    if ( $class->can($builder) ) {
-        sub {
-            my $self = shift;
-
-            if ( @_ ) {
-                $self->set_scraper( $path => shift );
-            }
-            elsif ( exists $self->_scrapers->{$path} ) {
-                $self->get_scraper( $path );
-            }
-            else {
-                $self->set_scraper( $path => $self->$builder );
-                $self->get_scraper( $path );
-            }
-        };
-    }
-    else {
-        sub {
-            my $self = shift;
-            return $self->get_scraper( $path ) unless @_;
-            $self->set_scraper( $path => shift );
-        };
-    }
+    sub {
+        my $self = shift;
+        return $self->get_scraper( $path ) unless @_;
+        $self->set_scraper( $path => shift );
+    };
 }
 
 sub new {
     my $class = shift;
     my %args = @_ == 1 ? %{$_[0]} : @_;
-    bless \%args, $class;
+    my ( $agent, $from ) = delete @args{qw/agent from/};
+    my $self = bless { %args }, $class;
+
+    if ( exists $self->{user_agent} ) {
+        $self->agent( $agent ) if defined $agent;
+        $self->from( $from ) if defined $from;
+    }
+    else {
+        $self->user_agent(
+            LWP::RobotUA->new(
+                agent => $agent || sprintf( '%s/%s', $class, $self->VERSION ),
+                from => $from,
+            )
+        );
+    }
+
+    # initialize scrapers
+    for my $path ( $class->known_paths ) {
+        my $accessor = $class->accessor_name_for( $path );
+        my $builder = $class->builder_name_for( $path );
+        next unless $self->can( $accessor ) and $self->can( $builder );
+        $self->$accessor( $self->$builder );
+    }
+
+    $self;
 }
 
 sub user_agent {
     my $self = shift;
-
-    if ( @_ ) {
-        $self->{user_agent} = shift;
-        for my $scraper ( values %{$self->_scrapers} ) {
-            $scraper->user_agent( $self->{user_agent} ); # overwrite
-        }
-    }
-    elsif ( exists $self->{user_agent} ) {
-        $self->{user_agent};
-    }
-    else {
-        $self->{user_agent} = $self->_build_user_agent;
-    }
-}
-
-sub _build_user_agent {
-    my $self = shift;
-
-    LWP::RobotUA->new(
-        agent => $self->agent,
-        from => $self->from,
-    );
+    $self->{user_agent} = shift if @_;
+    $self->{user_agent};
 }
 
 sub agent {
-    my $self = shift;
-
-    if ( exists $self->{user_agent} ) {
-        $self->user_agent->agent( @_ );
-    }
-    elsif ( @_ ) {
-        $self->{agent} = shift;
-    }
-    else {
-        $self->{agent} ||= $self->_build_agent;
-    }
-}
-
-sub _build_agent {
-    my $self = shift;
-    sprintf '%s/%s', ref $self, $self->VERSION;
+    my ( $self, @args ) = @_;
+    $self->user_agent->agent( @args );
 }
 
 sub from {
-    my $self = shift;
-
-    if ( exists $self->{user_agent} ) {
-        $self->user_agent->from( @_ );
-    }
-    elsif ( @_ ) {
-        $self->{from} = shift;
-    }
-    else {
-        $self->{from};
-    }
+    my ( $self, @args ) = @_;
+    $self->user_agent->default_header( 'From', @args );
 }
 
 sub date_filter {
@@ -247,40 +245,48 @@ sub set_scraper {
     while ( my ($path, $scraper) = splice @pairs, 0, 2 ) {
         croak "$scraper ($path scraper) is missing 'scrape' method"
             unless blessed $scraper and $scraper->can('scrape');
-        croak "$scraper ($path scraper) is missing 'user_agent' method"
-            unless $scraper->can('user_agent');
-        $scraper->user_agent( $self->user_agent ); # overwrite
         $scrapers->{$path} = $scraper;
     }
 
     return;
 }
 
+sub each_scraper {
+    my ( $self, $code ) = @_;
+    my $scrapers = $self->_scrapers;
+
+    croak 'Not a CODE reference' unless ref $code eq 'CODE';
+
+    for my $path ( keys %$scrapers ) {
+        my $scraper = $scrapers->{$path}; # copy
+        $code->( $path => $scraper );
+    }
+
+    return;
+}
+
+sub can_scrape {
+    my $self = shift;
+    my $uri = $self->_build_uri( shift );
+    my $path = $uri =~ m{^https?://www\.gokgs\.com/} && $uri->path;
+    $path && exists $self->_scrapers->{$path};
+}
+
 sub scrape {
     my ( $self, $arg ) = @_;
+    my $uri = $self->_build_uri( $arg );
+    my $path = $uri =~ m{^https?://www\.gokgs\.com/} && $uri->path;
+    my $scraper = $path && $self->get_scraper( $path );
+    return $scraper->scrape( $uri ) if $scraper;
+    croak "Don't know how to scrape '$arg'";
+}
 
-    my $uri = URI->new( $arg );
-       $uri->authority( 'www.gokgs.com' ) unless $uri->authority;
-       $uri->scheme( 'http' ) unless $uri->scheme;
-
-    my $scraper = do {
-        my $path = $uri =~ m{^https?://www\.gokgs\.com/} && $uri->path;
-        my $accessor = $path && $self->accessor_name_for( $path );
-
-        if ( $accessor and $self->can($accessor) ) {
-            $self->$accessor;
-        }
-        elsif ( $path ) {
-            $self->get_scraper( $path );
-        }
-        else {
-            undef;
-        }
-    };
-
-    croak "Don't know how to scrape '$arg'" unless $scraper;
-
-    $scraper->scrape( $uri );
+sub _build_uri {
+    my $self = shift;
+    my $uri = URI->new( shift );
+    $uri->scheme( 'http' ) unless $uri->scheme;
+    $uri->authority( 'www.gokgs.com' ) unless $uri->authority;
+    $uri;
 }
 
 1;
@@ -371,12 +377,13 @@ NOTE: C<LWP::RobotUA> fails to read C</robots.txt>
 since the KGS web server doesn't returns the Content-Type response header
 as of June 23rd, 2014. This module can not solve this problem.
 
-You can also set your own user agent object as follows:
+You can also set your own user agent object which inherits from
+L<LWP::UserAgent> as follows:
 
   use LWP::UserAgent;
 
-  my $gokgs = WWW::GoKGS->new(
-      user_agent => LWP::UserAgent->new(
+  $gokgs->user_agent(
+      LWP::UserAgent->new(
           agent => 'MyAgent/1.00'
       )
   );
@@ -486,6 +493,13 @@ C</tournGames.jsp>. Defaults to a L<WWW::GoKGS::Scraper::TournGames> object.
 
 =over 4
 
+=item $bool = $gokgs->can_scrape( '/fooBar.jsp' )
+
+=item $bool = $gokgs->can_scrape( 'http://www.gokgs.com/fooBar.jsp' )
+
+Returns a Boolean value telling whether C<$gokgs> can C<scrape> the resource
+specified by the given path.
+
 =item $HashRef = $gokgs->scrape( '/gameArchives.jsp?user=foo' )
 
 =item $HashRef = $gokgs->scrape( 'http://www.gokgs.com/gameArchives.jsp?user=foo' )
@@ -579,17 +593,50 @@ call.
       }
   );
 
+=item $gokgs->each_scraper( sub { my ($path, $scraper) = @_; ... } )
+
+Given a subref, applies the subroutine to each scraper object in turn.
+The callback routine is called with two parameters; the path to the resource
+on KGS and the scraper object which can scrape the resource.
+
+  $gokgs->each_scraper(sub {
+      my $path = shift; # => "/gameArchives.jsp"
+      my $scraper = shift; # isa WWW::GoKGS::Scraper::GameArchives
+
+      # overwrite "user_agent" attributes of all the scraper objects
+      $scraper->user_agent( $gokgs->user_agent );
+  });
+
+
 =back
 
 =head2 CLASS METHODS
 
 =over 4
 
+=item @paths = $class->known_paths
+
+Returns an incomplete list of paths to KGS resources.
+You can add a new path by subclassing or sending a patch to the module author.
+
+  my @paths = WWW::GoKGS->known_paths;
+  # => (
+  #    "/graphPage.jsp",
+  #    "/gameArchives.jsp",
+  #    "/plusSchedule.jsp",
+  #    "/top100.jsp",
+  #    "/tournEntrants.jsp",
+  #    "/tournGames.jsp",
+  #    "/tournInfo.jsp",
+  #    "/tournList.jsp"
+  # )
+
 =item $class->mk_accessors( $path )
 
 =item $class->mk_accessors( @paths )
 
 Creates the accessor method for a scraper which can C<scrape> C<$path>.
+C<$path> must be included by C<< $class->known_paths >>.
 You can also create multiple accessors in one C<mk_accessors> call.
 
   use parent 'WWW::GoKGS';
