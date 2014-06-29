@@ -2,14 +2,11 @@ package WWW::GoKGS::Scraper::TournEntrants;
 use strict;
 use warnings;
 use parent qw/WWW::GoKGS::Scraper/;
-use URI;
 use Web::Scraper;
 use WWW::GoKGS::Scraper::Filters qw/datetime/;
 use WWW::GoKGS::Scraper::TournLinks qw/process_links/;
 
-sub _build_base_uri {
-    URI->new('http://www.gokgs.com/tournEntrants.jsp');
-}
+sub base_uri { 'http://www.gokgs.com/tournEntrants.jsp' }
 
 sub _build_scraper {
     my $self = shift;
@@ -36,23 +33,8 @@ sub _build_scraper {
                 'entrants[]' => scraper { # Round Robin
                     process '//td', 'columns[]' => 'TEXT';
                     result 'columns'; };
-        process_links $self->_assoc_filter('links.rounds[].start_time'),
-                      $self->_assoc_filter('links.rounds[].end_time');
+        process_links;
     };
-}
-
-sub _build_filter {
-    my $self = shift;
-
-    {
-        'links.rounds[].start_time' => [ \&datetime ],
-        'links.rounds[].end_time'   => [ \&datetime ],
-    };
-}
-
-sub _assoc_filter {
-    my ( $self, $key ) = @_;
-    ( $key, [ $self->get_filter($key) ] );
 }
 
 sub scrape {
@@ -189,14 +171,28 @@ WWW::GoKGS::Scraper::TournEntrants - KGS Tournament Entrants
 
 This class inherits from L<WWW::GoKGS::Scraper>.
 
-=head2 ATTRIBUTES
+=head2 CLASS METHODS
 
 =over 4
 
-=item $URI = $tourn_entrants->base_uri
+=item $uri = $class->base_uri
 
-Defaluts to C<http://www.gokgs.com/tournEntrants.jsp>.
-This attribute is read-only.
+  # => "http://www.gokgs.com/tournEntrants.jsp"
+
+=item $URI = $class->build_uri( $k1 => $v1, $k2 => $v2, ... )
+
+=item $URI = $class->build_uri({ $k1 => $v1, $k2 => $v2, ... })
+
+=item $URI = $class->build_uri([ $k1 => $v1, $k2 => $v2, ... ])
+
+Given key-value pairs of query parameters, constructs a L<URI> object
+which consists of C<base_uri> and the parameters.
+
+=back
+
+=head2 INSTANCE METHODS
+
+=over 4
 
 =item $UserAgent = $tourn_entrants->user_agent
 
@@ -205,29 +201,6 @@ This attribute is read-only.
 Can be used to get or set an L<LWP::UserAgent> object which is used to
 C<GET> the requested resource. Defaults to the C<LWP::UserAgent> object
 shared by L<Web::Scraper> users (C<$Web::Scraper::UserAgent>).
-
-=back
-
-=head2 METHODS
-
-=over 4
-
-=item $tourn_entrants->add_filter( 'links.rounds[].start_time' => $filter )
-
-=item $tourn_entrants->add_filter( 'links.rounds[].end_time' => $filter )
-
-Adds a round start/end time filter. C<$filter> is called with a date string
-such as C<2014-05-17T19:05Z>. C<$filter> can be either a filter class name
-or a subref. See L<Web::Scraper::Filter> for details.
-
-  use Time::Piece qw/gmtime/;
-
-  $tourn_entrants->add_filter(
-      'links.rounds[].start_time' => sub {
-          my $start_time = shift; # => "2014-05-17T19:05Z"
-          gmtime->strptime( $start_time, '%Y-%m-%dT%H:%MZ' );
-      }
-  );
 
 =item $HashRef = $tourn_entrants->query( id => $tourn_id, sort => 's' )
 

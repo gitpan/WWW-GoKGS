@@ -2,27 +2,35 @@ package WWW::GoKGS::Scraper;
 use strict;
 use warnings;
 use Carp qw/croak/;
-use Web::Scraper qw//;
+use URI;
+
+sub base_uri {
+    croak 'call to abstract method ', __PACKAGE__, '::base_uri';
+}
+
+sub build_uri {
+    my ( $class, @args ) = @_;
+    my $uri = URI->new( $class->base_uri );
+    $uri->query_form( @args ) if @args;
+    $uri;
+}
 
 sub new {
     my $class = shift;
     my %args = @_ == 1 ? %{$_[0]} : @_;
-    my $user_agent = delete $args{user_agent};
-    my $self = bless { %args }, $class;
+    my $self = bless {}, $class;
 
-    $self->user_agent( $user_agent ) if $user_agent;
+    $self->init( \%args );
 
     $self;
 }
 
-sub base_uri {
-    my $self = shift;
-    return $self->{base_uri} if exists $self->{base_uri};
-    $self->{base_uri} = $self->_build_base_uri;
-}
+sub init {
+    my ( $self, $args ) = @_;
 
-sub _build_base_uri {
-    croak 'call to abstract method ', __PACKAGE__, '::_build_base_uri';
+    $self->user_agent( $args->{user_agent} ) if exists $args->{user_agent};
+
+    return;
 }
 
 sub _scraper {
@@ -46,47 +54,7 @@ sub scrape {
 
 sub query {
     my ( $self, @args ) = @_;
-
-    $self->scrape(do {
-        my $uri = $self->base_uri->clone;
-        $uri->query_form( @args );
-        $uri;
-    });
-}
-
-sub _filter {
-    my $self = shift;
-    $self->{filter} ||= $self->_build_filter;
-}
-
-sub _build_filter { +{} }
-
-sub get_filter {
-    my ( $self, $key ) = @_;
-    @{ $self->_filter->{$key} || [] };
-}
-
-sub add_filter {
-    my ( $self, @pairs ) = @_;
-    my $filter = $self->_filter;
-
-    croak "Odd number of arguments passed to 'add_filter'" if @pairs % 2;
-
-    while ( my ($key, $value) = splice @pairs, 0, 2 ) {
-        push @{ $filter->{$key} ||= [] }, $value;
-    }
-
-    return;
-}
-
-sub run_filter {
-    my ( $self, $key, $value ) = @_;
-
-    for my $filter ( $self->get_filter($key) ) {
-        $value = Web::Scraper::run_filter( $value, $filter );
-    }
-
-    $value;
+    $self->scrape( ref($self)->build_uri(@args) );
 }
 
 1;
@@ -100,12 +68,9 @@ WWW::GoKGS::Scraper - Abstract base class for KGS scrapers
 =head1 SYNOPSIS
 
   use parent 'WWW::GoKGS::Scraper';
-  use URI;
   use Web::Scraper;
 
-  sub _build_base_uri {
-      URI->new('http://www.gokgs.com/...');
-  }
+  sub base_uri { 'http://www.gokgs.com/...' }
 
   sub _build_scraper {
       my $self = shift;
@@ -117,22 +82,41 @@ WWW::GoKGS::Scraper - Abstract base class for KGS scrapers
 
 =head1 DESCRIPTION
 
-This module is an abstract base class for KGS scrapers.
-KGS scrapers must inherit from this class, and also implement two methods;
-C<_build_base_uri> and C<_build_scraper>. C<_build_base_uri> must return
-a L<URI> object which represents a resource on KGS.
-C<_build_scraper> must return an L<Web::Scraper> object which can C<scrape>
-the resource. Both of them are called as a method on the object
-with no parameters.
-
-=head2 ATTRIBUTES
+This module is an abstract base class for KGS scrapers. KGS scrapers must
+inherit from this class, and also implement the following methods:
 
 =over 4
 
-=item $URI = $scraper->base_uri
+=item base_uri
 
-Returns a L<URI> object which represents a resource on KGS.
-This attribute is read-only.
+Must return a URI string which represents a resource on KGS.
+This method is called as a method on the class.
+
+=item _build_scraper
+
+Must return an L<Web::Scraper> object which can C<scrape> the resource.
+This method is called as a method on the object.
+
+=back
+
+=head2 CLASS METHODS
+
+=over 4
+
+=item $URI = $class->build_uri( $k1 => $v1, $k2 => $v2, ... )
+
+=item $URI = $class->build_uri({ $k1 => $v1, $k2 => $v2, ... })
+
+=item $URI = $class->build_uri([ $k1 => $v1, $k2 => $v2, ... ])
+
+Given key-value pairs of query parameters, constructs a L<URI> object
+which consists of C<base_uri> and the paramters.
+
+=back
+
+=head2 INSTANCE METHODS
+
+=over 4
 
 =item $UserAgent = $scraper->user_agent
 
@@ -141,29 +125,6 @@ This attribute is read-only.
 Can be used to get or set an L<LWP::UserAgent> object which is used to
 C<GET> the requested resource. Defaults to the C<LWP::UserAgent> object
 shared by L<Web::Scraper> users (C<$Web::Scraper::UserAgent>).
-
-=back
-
-=head2 METHODS
-
-=over 4
-
-=item @filters = $scraper->get_filter( $key )
-
-Returns all the filters associated with C<$key>.
-
-=item $scraper->add_filter( $key => $filter )
-
-=item $scraper->add_filter( $k1 => $f1, $k2 => $f2, ... )
-
-Pushes C<$filter> onto the filter stack specified by C<$key>.
-You can also push multiple filters in one C<add_filter> call.
-C<$filter> can be either a filter class name or a subref.
-See L<Web::Scraper::Filter> for details.
-
-=item $filtered_value = $scraper->run_filter( $key, $value )
-
-Executes all the filters associated with C<$key> on C<$value>.
 
 =item $scraper->scrape( URI->new(...) )
 
@@ -178,9 +139,9 @@ an L<Web::Scraper> object built by the C<_build_scraper> method.
 
 =item $scraper->query( $k1 => $v1, $k2 => $v2, ... )
 
-Given key-value pairs of query parameters,
-constructs a L<URI> object which consists of C<base_uri> and the query
-parameters, then pass the C<URI> to the C<scrape> method.
+Given key-value pairs of query parameters, constructs a L<URI> object
+which consists of C<base_uri> and the parameters, then pass the C<URI>
+to the C<scrape> method.
 
 =back
 

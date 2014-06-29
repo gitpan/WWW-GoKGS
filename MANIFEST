@@ -19,7 +19,6 @@ META.yml
 README
 t/00_compile.t
 t/10_basic.t
-t/11_subclassing.t
 xt/00_pod.t
 xt/10_game_archives.t
 xt/11_top_100.t

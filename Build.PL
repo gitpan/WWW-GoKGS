@@ -15,8 +15,6 @@ my $build = Module::Build->new(
         'Exporter' => 0,
         'LWP::RobotUA' => 0,
         'URI' => '1.59',
-        'Scalar::Util' => 0,
-        'String::CamelCase' => 0,
         'Web::Scraper' => 0,
     },
     test_requires => {

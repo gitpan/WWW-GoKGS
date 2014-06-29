@@ -2,12 +2,9 @@ package WWW::GoKGS::Scraper::TournList;
 use strict;
 use warnings FATAL => 'all';
 use parent qw/WWW::GoKGS::Scraper/;
-use URI;
 use Web::Scraper;
 
-sub _build_base_uri {
-    URI->new('http://www.gokgs.com/tournList.jsp');
-}
+sub base_uri { 'http://www.gokgs.com/tournList.jsp' }
 
 sub _build_scraper {
     my $self = shift;
@@ -93,14 +90,28 @@ WWW::GoKGS::Scraper::TournList - List of KGS tournaments
 
 This class inherits from L<WWW::GoKGS::Scraper>.
 
-=head2 ATTRIBUTES
+=head2 INSTANCE METHODS
 
 =over 4
 
-=item $URI = $tourn_list->base_uri
+=item $uri = $class->base_uri
 
-Defaults to C<http://www.gokgs.com/tournList.jsp>.
-This attribute is read-only.
+  # => "http://www.gokgs.com/tournList.jsp"
+
+=item $URI = $class->build_uri( $k1 => $v1, $k2 => $v2, ... )
+
+=item $URI = $class->build_uri({ $k1 => $v1, $k2 => $v2, ... })
+
+=item $URI = $class->build_uri([ $k1 => $v1, $k2 => $v2, ... ])
+
+Given key-value pairs of query parameters, constructs a L<URI> object
+which consists of C<base_uri> and the paramters.
+
+=back
+
+=head2 METHODS
+
+=over 4
 
 =item $UserAgent = $tourn_list->user_agent
 
@@ -109,12 +120,6 @@ This attribute is read-only.
 Can be used to get or set an L<LWP::UserAgent> object which is used to
 C<GET> the requested resource. Defaults to the C<LWP::UserAgent> object
 shared by L<Web::Scraper> users (C<$Web::Scraper::UserAgent>).
-
-=back
-
-=head2 METHODS
-
-=over 4
 
 =item $HashRef = $tourn_list->scrape( URI->new(...) )
 

@@ -2,13 +2,10 @@ package WWW::GoKGS::Scraper::GameArchives;
 use strict;
 use warnings FATAL => 'all';
 use parent qw/WWW::GoKGS::Scraper/;
-use URI;
 use Web::Scraper;
 use WWW::GoKGS::Scraper::Filters qw/datetime/;
 
-sub _build_base_uri {
-    URI->new('http://www.gokgs.com/gameArchives.jsp');
-}
+sub base_uri { 'http://www.gokgs.com/gameArchives.jsp' }
 
 sub _build_scraper {
     my $self = shift;
@@ -52,14 +49,6 @@ sub _build_scraper {
         process '//a[contains(@href, ".tar.gz")]', 'tgz_uri' => '@href';
         process '//table[descendant::tr/th/text()="Year"]//following-sibling::tr',
                 'calendar[]' => $calendar;
-    };
-}
-
-sub _build_filter {
-    my $self = shift;
-
-    {
-        'games[].start_time' => [ \&datetime ],
     };
 }
 
@@ -123,7 +112,7 @@ sub scrape {
         $game->{setup}      = $game->{maybe_setup};
     }
     continue {
-        $game->{start_time} = $self->run_filter( 'games[].start_time', $game->{start_time} );
+        $game->{start_time} = datetime( $game->{start_time} );
         $game->{result}     = $canonical_result{$game->{result}} || $game->{result};
         $game->{setup}      =~ /^(\d+)\x{d7}\d+ (?:H(\d+))?$/;
         $game->{board_size} = int $1;
@@ -181,16 +170,28 @@ Although this module can be used to implement crawlers,
 the author doesn't intend to violate their policy.
 Use at your own risk.
 
-=head2 ATTRIBUTES
+=head2 CLASS METHODS
 
 =over 4
 
-=item $URI = $game_archives->base_uri
+=item $uri = $class->base_uri
 
-Defaults to C<http://www.gokgs.com/gameArchives.jsp>.
-The value is used to create a request URI by C<query> method.
-The request URI is passed to C<scrape> method.
-This attribute is read-only.
+  # => "http://www.gokgs.com/gameArchives.jsp"
+
+=item $URI = $class->build_uri( $k1 => $v1, $k2 => $v2, ... )
+
+=item $URI = $class->build_uri({ $k1 => $v1, $k2 => $v2, ... })
+
+=item $URI = $class->build_uri([ $k1 => $v1, $k2 => $v2, ... ])
+
+Given key-value pairs of query parameters, constructs a L<URI> object
+which consists of C<base_uri> and the parameters.
+
+=back
+
+=head2 INSTANCE METHODS
+
+=over 4
 
 =item $UserAgent = $game_archives->user_agent
 
@@ -199,27 +200,6 @@ This attribute is read-only.
 Can be used to get or set an L<LWP::UserAgent> object which is used to
 C<GET> the requested resource. Defaults to the C<LWP::UserAgent> object
 shared by L<Web::Scraper> users (C<$Web::Scraper::UserAgent>).
-
-=back
-
-=head2 METHODS
-
-=over 4
-
-=item $game_archives->add_filter( 'games[].start_time' => $filter )
-
-Adds a game start time filter. C<$filter> is called with a date string
-such as C<2014-05-17T19:05Z>. C<$filter> can be either a filter class name
-or a subref. See L<Web::Scraper::Filter> for details.
-
-  use Time::Piece qw/gmtime/;
-
-  $game_archives->add_filter(
-      'games[].start_time' => sub {
-          my $start_time = shift; # => "2014-05-17T19:05Z"
-          gmtime->strptime( $start_time, '%Y-%m-%dT%H:%MZ' );
-      }
-  );
 
 =item $HashRef = $game_archives->query( user => 'YourAccount', ... )
 
@@ -312,6 +292,15 @@ C<query> method is just a wrapper of this method. For example,
 you can pass URIs included by the return value of C<query> method.
 
 =back
+
+=head1 EXAMPLES
+
+  use JSON::Path qw/jpath_map/; 
+  use Time::Piece qw/gmtime/;
+
+  # convert start times for games into Time::Piece objects
+  jpath_map { gmtime->strftime('%Y-%m-%dT%H:%MZ', $_) }
+      $result, '$.games[*].start_time';
 
 =head1 HISTORY
 

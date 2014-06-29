@@ -80,91 +80,39 @@ DESCRIPTION
         NOTE: You should set a delay between requests to avoid overloading
         the KGS server.
 
-    $email_address = $gokgs->from
-    $gokgs->from( 'user@example.com' )
-        Can be used to get or set your email address which is used by
-        "$gokgs->user_agent" to send the From request header that indicates
-        who is making the request. This attribute must be defined when you
-        use LWP::RobotUA.
-
-          my $gokgs = WWW::GoKGS->new(
-              from => 'user@example.com'
-          );
-
-    $product_id = $gokgs->agent
-    $gokgs->agent( 'MyAgent/0.01' )
-        Can be used to get or set the product token that is used by
-        "$gokgs->user_agent" to send the User-Agent request header. Defaults
-        to "WWW::GoKGS/#.##", where "#.##" is substituted with the version
-        number of this module.
-
-    $CodeRef = $gokgs->html_filter
-    $gokgs->html_filter( sub { my $html = shift; ... } )
-        Can be used to get or set an HTML filter. Defaults to an anonymous
-        subref which just returns the given argument ("sub { $_[0] }"). The
-        callback is called with an HTML string. The return value is used as
-        the filtered value.
-
-          $gokgs->html_filter(sub {
-              my $html = shift;
-              $html =~ s/<.*?>//g; # strip HTML tags
-              $html;
-          });
-
-    $CodeRef = $gokgs->date_filter
-    $gokgs->date_filter( sub { my $date = shift; ... } )
-        Can be used to get or set a date filter. Defaults to an anonymous
-        subref which just returns the given argument ("sub { $_[0] }"). The
-        callback is called with a date string such as "2014-05-17T19:05Z".
-        The return value is used as the filtered value.
-
-          use Time::Piece qw/gmtime/;
-
-          $gokgs->date_filter(sub {
-              my $date = shift; # => "2014-05-17T19:05Z"
-              gmtime->strptime( $date, '%Y-%m-%dT%H:%MZ' );
-          });
-
     $GameArchives = $gokgs->game_archives
-    $gokgs->game_archives( WWW::GoKGS::Scraper::GameArchives->new(...) )
-        Can be used to get or set a scraper object which can "scrape"
-        "/gameArchives.jsp". Defaults to a WWW::GoKGS::Scraper::GameArchives
-        object.
+        Returns a WWW::GoKGS::Scraper::GameArchives object.
 
     $Top100 = $gokgs->top_100
-    $gokgs->top_100( WWW::GoKGS::Scraper::Top100->new(...) )
-        Can be used to get or set a scraper object which can "scrape"
-        "/top100.jsp". Defaults to a WWW::GoKGS::Scraper::Top100 object.
+        Returns to a WWW::GoKGS::Scraper::Top100 object.
 
     $TournList = $gokgs->tourn_list
-    $gokgs->tourn_list( WWW::GoKGS::Scraper::TournList->new(...) )
-        Can be used to get or set a scraper object which can "scrape"
-        "/tournList.jsp". Defaults to a WWW::GoKGS::Scraper::TournList
-        object.
+        Returns a WWW::GoKGS::Scraper::TournList object.
 
     $TournInfo = $gokgs->tourn_info
-    $gokgs->tourn_info( WWW::GoKGS::Scraper::TournInfo->new(...) )
-        Can be used to get or set a scraper object which can "scrape"
-        "/tournInfo.jsp". Defaults to a WWW::GoKGS::Scraper::TournInfo
-        object.
+        Returns a WWW::GoKGS::Scraper::TournInfo object.
 
     $TournEntrants = $gokgs->tourn_entrants
-    $gokgs->tourn_entrants( WWW::GoKGS::Scraper::TournEntrants->new(...) )
-        Can be used to get or set a scraper object which can "scrape"
-        "/tournEntrants.jsp". Defaults to a
-        WWW::GoKGS::Scraper::TournEntrants object.
+        Returns a WWW::GoKGS::Scraper::TournEntrants object.
 
     $TournGames = $gokgs->tourn_games
-    $gokgs->tourn_games( WWW::GoKGS::Scraper::TournGames->new(...) )
-        Can be used to get or set a scraper object which can "scrape"
-        "/tournGames.jsp". Defaults to a WWW::GoKGS::Scraper::TournGames
-        object.
+        Returns a WWW::GoKGS::Scraper::TournGames object.
 
   INSTANCE METHODS
+    $email_address = $gokgs->from
+    $gokgs->from( 'user@example.com' )
+        Can be used to get or set your email address which is used to send
+        the From request header that indicates who is making the request.
+
+    $agent = $gokgs->agent
+    $gokgs->agent( 'MyAgent/0.01' )
+        Can be used to get or set the product token that is used to send the
+        User-Agent request header.
+
     $bool = $gokgs->can_scrape( '/fooBar.jsp' )
     $bool = $gokgs->can_scrape( 'http://www.gokgs.com/fooBar.jsp' )
         Returns a Boolean value telling whether $gokgs can "scrape" the
-        resource specified by the given path.
+        resource specified by the given URL.
 
     $HashRef = $gokgs->scrape( '/gameArchives.jsp?user=foo' )
     $HashRef = $gokgs->scrape(
@@ -232,23 +180,6 @@ DESCRIPTION
           my $game_archives = $gokgs->get_scraper( '/gameArchives.jsp' );
           # => WWW::GoKGS::Scraper::GameArchives object
 
-    $gokgs->set_scraper( $path => $scraper )
-    $gokgs->set_scraper( $p1 => $s1, $p2 => $s2, ... )
-        Can be used to set a scraper object which can "scrape" a resource
-        located at $path on KGS. You can also set multiple scrapers in one
-        "set_scraper" call.
-
-          use Web::Scraper;
-          use WWW::GoKGS::Scraper::FooBar; # isa WWW::GoKGS::Scraper
-
-          $gokgs->set_scraper(
-              '/fooBar.jsp' => WWW::GoKGS::Scraper::FooBar->new,
-              '/barBaz.jsp' => scraper {
-                   process '.bar', baz => 'TEXT';
-                   ...
-              }
-          );
-
     $gokgs->each_scraper( sub { my ($path, $scraper) = @_; ... } )
         Given a subref, applies the subroutine to each scraper object in
         turn. The callback routine is called with two parameters; the path
@@ -262,75 +193,6 @@ DESCRIPTION
               # overwrite "user_agent" attributes of all the scraper objects
               $scraper->user_agent( $gokgs->user_agent );
           });
-
-  CLASS METHODS
-    @paths = $class->known_paths
-        Returns an incomplete list of paths to KGS resources. You can add a
-        new path by subclassing or sending a patch to the module author.
-
-          my @paths = WWW::GoKGS->known_paths;
-          # => (
-          #    "/graphPage.jsp",
-          #    "/gameArchives.jsp",
-          #    "/plusSchedule.jsp",
-          #    "/top100.jsp",
-          #    "/tournEntrants.jsp",
-          #    "/tournGames.jsp",
-          #    "/tournInfo.jsp",
-          #    "/tournList.jsp"
-          # )
-
-    $class->mk_accessors( $path )
-    $class->mk_accessors( @paths )
-        Creates the accessor method for a scraper which can "scrape" $path.
-        $path must be included by "$class->known_paths". You can also create
-        multiple accessors in one "mk_accessors" call.
-
-          use parent 'WWW::GoKGS';
-
-          # Generates foo_bar() whose builder is _build_foo_bar()
-          __PACKAGE__->mk_accessors( '/fooBar.jsp' );
-
-          # Build a scraper object which can scrape /fooBar.jsp
-          sub _build_foo_bar {
-              my $self = shift;
-              ...
-          }
-
-    $CodeRef = $class->make_accessor( $path )
-        Returns a subroutine reference which acts as an accessor for the
-        scraper which can "scrape" $path.
-
-    $accessor_name = $class->accessor_name_for( $path )
-        Returns the accessor name of a scraper which can "scrape" $path.
-
-          my $accessor_name = $class->accessor_name_for( '/fooBar.jsp' );
-          # => "foo_bar"
-
-    $builder_name = $class->builder_name_for( $path )
-        Returns the builder name of a scraper which can "scrape" $path.
-
-          my $builder_name = $class->builder_name_for( '/fooBar.jsp' );
-          # => "_build_foo_bar"
-
-WRITING SCRAPERS
-    KGS scrapers should use a namespace which starts with
-    "WWW::GoKGS::Scraper::", and also should be a subclass of
-    WWW::GoKGS::Scraper so that the users can not only use the module
-    solely, but also can add the scraper object to "WWW::GoKGS" object as
-    follows:
-
-      use WWW::GoKGS::Scraper::FooBar; # your scraper
-
-      # using set_scraper()
-      $gokgs->set_scraper(
-          '/fooBar.jsp' => WWW::GoKGS::Scraper::FooBar->new
-      );
-
-      # by subclassing
-      use parent 'WWW::GoKGS';
-      __PACKAGE__->mk_accessors( '/fooBar.jsp' );
-      sub _build_foo_bar { WWW::GoKGS::Scraper::FooBar->new }
 
 ENVIRONMENTAL VARIABLES
     AUTHOR_TESTING

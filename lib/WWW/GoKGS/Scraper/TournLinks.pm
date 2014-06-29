@@ -3,6 +3,7 @@ use strict;
 use warnings FATAL => 'all';
 use Exporter qw/import/;
 use Web::Scraper;
+use WWW::GoKGS::Scraper::Filters qw/datetime/;
 
 our @EXPORT_OK = qw( process_links );
 
@@ -17,7 +18,7 @@ sub process_links {
             $time =~ tr/\x{a0}/ / if $time;
             $time;
         },
-        @{ $filter{'links.rounds[].start_time'} || [] },
+        \&datetime,
     );
 
     my @end_time = (
@@ -26,7 +27,7 @@ sub process_links {
             $time =~ tr/\x{a0}/ / if $time;
             $time;
         },
-        @{ $filter{'links.rounds[].end_time'} || [] },
+        \&datetime,
     );
 
     process '//div[@class="tournData"]', 'links' => scraper {

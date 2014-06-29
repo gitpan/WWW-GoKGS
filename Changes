@@ -1,5 +1,48 @@
 Revision history for Perl extension WWW::GoKGS.
 
+0.15 Jun 29th, 2014
+
+  [INCOMPATIBLE CHANGES]
+
+    - Give up implementing incomplete filtering system.
+      Instead, you can use nice modules on CPAN, such as JSON::Path
+      which allows you to search complicated data structure.
+      The following instance methods were removed:
+
+        * WWW::GoKGS#date_filter
+        * WWW::GoKGS#html_filter
+        * WWW::GoKGS::Scraper#add_filter
+        * WWW::GoKGS::Scraper#run_filter
+        * WWW::GoKGS::Scraper::GameArchives#add_filter
+        * WWW::GoKGS::Scraper::TournInfo#add_filter
+        * WWW::GoKGS::Scraper::TournEntrants#add_filter
+        * WWW::GoKGS::Scraper::TournGames#add_filter
+
+    - Give up implementing imperfect class-building system.
+      The following class methods were removed:
+
+        * WWW::GoKGS#mk_accessors
+        * WWW::GoKGS#make_accessor
+        * WWW::GoKGS#accessor_name_for
+        * WWW::GoKGS#builder_name_for
+        * WWW::GoKGS#known_paths
+
+      Besides, the following instance methods become read-only:
+
+        * WWW::GoKGS#game_archives
+        * WWW::GoKGS#top_100
+        * WWW::GoKGS#tourn_list
+        * WWW::GoKGS#tourn_info
+        * WWW::GoKGS#tourn_entrants
+        * WWW::GoKGS#tourn_games
+
+      In addition, the following instance methods were removed:
+
+        * WWW::GoKGS#set_scraper
+
+    - Sorry for your inconvenience. I decided to commit the terrible changes
+      listed above to make this distribution maintainable.
+
 0.14 Jun 26th, 2014
 
   - Add the following instance methods:
