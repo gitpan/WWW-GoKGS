@@ -5,11 +5,17 @@ use warnings;
 use Carp qw/croak/;
 use LWP::RobotUA;
 use URI;
+use WWW::GoKGS::Scraper::GameArchives;
+use WWW::GoKGS::Scraper::Top100;
+use WWW::GoKGS::Scraper::TournList;
+use WWW::GoKGS::Scraper::TournInfo;
+use WWW::GoKGS::Scraper::TournEntrants;
+use WWW::GoKGS::Scraper::TournGames;
 
-our $VERSION = '0.15';
+our $VERSION = '0.16';
 
-BEGIN {
-    my %isa = (
+BEGIN { # install scrapers
+    my %scrapers = (
         game_archives  => 'WWW::GoKGS::Scraper::GameArchives',
         top_100        => 'WWW::GoKGS::Scraper::Top100',
         tourn_list     => 'WWW::GoKGS::Scraper::TournList',
@@ -19,32 +25,25 @@ BEGIN {
     );
 
     my %paths;
-    while ( my ($method, $class) = each %isa ) {
-        my $file = $class;
-           $file =~ s{::}{/}g;
-           $file = "$file.pm";
-
-        require $file;
-
+    while ( my ($method, $class) = each %scrapers ) {
         my $path = $paths{$class} = $class->build_uri->path;
         my $body = sub { $_[0]->get_scraper($path) };
-
         no strict 'refs';
         *$method = $body;
     }
 
-    *__build_scrapers = sub {
+    sub __build_scrapers {
         my $self = shift;
 
-        my %scrapers;
+        my %_scrapers;
         while ( my ($class, $path) = each %paths ) {
-            $scrapers{$path} = $class->new(
+            $_scrapers{$path} = $class->new(
                 user_agent => $self->user_agent,
             );
         }
 
-        \%scrapers;
-    };
+        \%_scrapers;
+    }
 }
 
 sub new {
@@ -106,12 +105,11 @@ sub get_scraper {
 
 sub each_scraper {
     my ( $self, $code ) = @_;
-    my $scrapers = $self->_scrapers;
+    my %scrapers = %{ $self->_scrapers };
 
     croak 'Not a CODE reference' unless ref $code eq 'CODE';
 
-    for my $path ( keys %$scrapers ) {
-        my $scraper = $scrapers->{$path}; # copy
+    while ( my ($path, $scraper) = each %scrapers ) {
         $code->( $path => $scraper );
     }
 

@@ -1,53 +1,42 @@
 use strict;
 use warnings;
 use xt::Util qw/:cmp_deeply/;
-use Path::Class qw/file/;
-use Test::More;
-use WWW::GoKGS::Scraper::TournInfo;
+use Encode qw/decode_utf8/;
+use Test::Base;
+use WWW::GoKGS;
+
+spec_file 'xt/13_tourn_info.spec';
 
 plan skip_all => 'AUTHOR_TESTING is required' unless $ENV{AUTHOR_TESTING};
-plan tests => 2;
+plan tests => 1 * blocks;
 
-subtest 'relaxed' => sub {
-    plan tests => 1;
+my $gokgs = WWW::GoKGS->new( from => 'anazawa@cpan.org' );
+   $gokgs->user_agent->delay( 1/60 );
 
-    my $tourn_info = WWW::GoKGS::Scraper::TournInfo->new;
-
-    my $got = $tourn_info->query(
-        id => 885,
-    );
-
-    my $expected = hash(
-        name => sub { defined },
-        description => sub { defined },
-        links => hash(
-            rounds => array_of_hashes(
-                round => [ integer(), sub { $_[0] >= 1 } ],
-                start_time => datetime( '%Y-%m-%dT%H:%MZ' ),
-                end_time => datetime( '%Y-%m-%dT%H:%MZ' ),
-                uri => [ uri(), sub { $_[0]->path eq '/tournGames.jsp' } ],
-            ),
+my $expected = hash(
+    name => sub { defined },
+    description => sub { defined },
+    links => hash(
+        rounds => array_of_hashes(
+            round => [ integer(), sub { $_[0] >= 1 } ],
+            start_time => datetime( '%Y-%m-%dT%H:%MZ' ),
+            end_time => datetime( '%Y-%m-%dT%H:%MZ' ),
+            uri => [ uri(), sub { $_[0]->path eq '/tournGames.jsp' } ],
         ),
-    );
+    ),
+);
 
-    cmp_deeply $got, $expected, 'id=885';
+run { 
+    my $block = shift;
+    my $got = $gokgs->tourn_info->scrape( $block->input );
+    is_deeply $got, $block->expected if defined $block->expected;
+    cmp_deeply $got, $expected unless defined $block->expected;
 };
 
-subtest 'paranoid' => sub {
-    plan tests => 1;
+sub build_uri {
+    $gokgs->tourn_info->build_uri( @_ );
+}
 
-    my $tourn_info = WWW::GoKGS::Scraper::TournInfo->new;
-
-    my $got = $tourn_info->query(
-        id => 857,
-    );
-
-    my $expected = do +file(
-        'xt',
-        'data',
-        'TournInfo',
-        '20140616-id-857.pl',
-    );
-
-    is_deeply $got, $expected, 'id=857';
-};
+sub html {
+    ( @_, $gokgs->tourn_info->build_uri );
+}

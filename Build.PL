@@ -22,6 +22,9 @@ my $build = Module::Build->new(
         'Test::Exception' => 0,
         'Test::More' => '0.98',
         'Time::Piece' => 0,
+        'Test::Deep' => 0,
+        'Test::Base' => 0,
+        'Encode' => 0,
     },
     test_files => [ 't/', 'xt/' ],
     meta_merge => {

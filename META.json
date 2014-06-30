@@ -39,7 +39,10 @@
       },
       "test" : {
          "requires" : {
+            "Encode" : "0",
             "Path::Class" : "0",
+            "Test::Base" : "0",
+            "Test::Deep" : "0",
             "Test::Exception" : "0",
             "Test::More" : "0.98",
             "Time::Piece" : "0"
@@ -49,7 +52,7 @@
    "provides" : {
       "WWW::GoKGS" : {
          "file" : "lib/WWW/GoKGS.pm",
-         "version" : "0.15"
+         "version" : "0.16"
       },
       "WWW::GoKGS::Scraper" : {
          "file" : "lib/WWW/GoKGS/Scraper.pm"
@@ -88,5 +91,5 @@
          "url" : "git://github.com/anazawa/p5-WWW-GoKGS.git"
       }
    },
-   "version" : "0.15"
+   "version" : "0.16"
 }

@@ -1,5 +1,12 @@
 Revision history for Perl extension WWW::GoKGS.
 
+0.16 Jun 30th, 2014
+
+  [INTERNAL]
+
+    - Simplify the BEGIN block of WWW::GoKGS
+    - Rewrite tests under xt/ using Test::Base
+
 0.15 Jun 29th, 2014
 
   [INCOMPATIBLE CHANGES]

@@ -1,29 +1,25 @@
 use strict;
 use warnings;
 use xt::Util qw/:cmp_deeply/;
-use Path::Class qw/file/;
-use Test::More;
-use WWW::GoKGS::Scraper::TournGames;
+use Encode qw/decode_utf8/;
+use Test::Base;
+use WWW::GoKGS;
+
+spec_file 'xt/15_tourn_games.spec';
 
 plan skip_all => 'AUTHOR_TESTING is required' unless $ENV{AUTHOR_TESTING};
-plan tests => 2;
+plan tests => 1 * blocks;
 
-subtest 'relaxed' => sub {
-    plan tests => 1;
+my $gokgs = WWW::GoKGS->new( from => 'anazawa@cpan.org' );
+   $gokgs->user_agent->delay( 1/60 );
 
-    my $tourn_games = WWW::GoKGS::Scraper::TournGames->new;
-
-    my $got = $tourn_games->query(
-        id => 879,
-        round => 1,
-    );
-
+my $expected = do {
     my %user = (
         name => user_name(),
         rank => user_rank(),
     );
 
-    my $expected = hash(
+    hash(
         name => sub { defined },
         round => [ integer(), sub { $_[0] >= 1 } ],
         games => array_of_hashes(
@@ -50,26 +46,19 @@ subtest 'relaxed' => sub {
             ),
         ),
     );
-
-    cmp_deeply $got, $expected, 'id=879&round=1';
 };
 
-subtest 'paranoid' => sub {
-    plan tests => 1;
-
-    my $tourn_games = WWW::GoKGS::Scraper::TournGames->new;
-
-    my $got = $tourn_games->query(
-        id => 488,
-        round => 1,
-    );
-
-    my $expected = do +file(
-        'xt',
-        'data',
-        'TournGames',
-        '20140616-id-488-round-1.pl',
-    );
-
-    is_deeply $got, $expected, 'id=488&round=1';
+run {
+    my $block = shift;
+    my $got = $gokgs->tourn_games->scrape( $block->input );
+    is_deeply $got, $block->expected if defined $block->expected;
+    cmp_deeply $got, $expected unless defined $block->expected;
 };
+
+sub build_uri {
+    $gokgs->tourn_games->build_uri( @_ );
+}
+
+sub html {
+    ( @_, $gokgs->tourn_games->build_uri );
+}
