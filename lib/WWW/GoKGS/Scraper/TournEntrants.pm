@@ -2,7 +2,7 @@ package WWW::GoKGS::Scraper::TournEntrants;
 use strict;
 use warnings;
 use parent qw/WWW::GoKGS::Scraper/;
-use Web::Scraper;
+use WWW::GoKGS::Scraper::Declare;
 use WWW::GoKGS::Scraper::Filters qw/datetime/;
 use WWW::GoKGS::Scraper::TournLinks qw/process_links/;
 

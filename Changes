@@ -1,5 +1,14 @@
 Revision history for Perl extension WWW::GoKGS.
 
+0.17 Jul 2nd, 2014
+
+  - WWW::GoKGS uses HTML::TreeBuilder::LibXML instead of
+    HTML::TreeBuilder when $ENV{WWW_GOKGS_LIBXML} is true
+
+  [INTERNAL]
+
+    - Add tests for HTML::TreeBuilder::LibXML
+
 0.16 Jun 30th, 2014
 
   [INTERNAL]

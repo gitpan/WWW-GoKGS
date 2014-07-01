@@ -2,7 +2,7 @@ package WWW::GoKGS::Scraper::TournList;
 use strict;
 use warnings FATAL => 'all';
 use parent qw/WWW::GoKGS::Scraper/;
-use Web::Scraper;
+use WWW::GoKGS::Scraper::Declare;
 
 sub base_uri { 'http://www.gokgs.com/tournList.jsp' }
 
@@ -15,7 +15,7 @@ sub _build_scraper {
     );
 
     my %year_index = (
-        year => [ 'TEXT', sub { int } ],
+        year => 'TEXT',
         uri  => '@href',
     );
 

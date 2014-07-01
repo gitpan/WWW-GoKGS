@@ -5,7 +5,7 @@ use Encode qw/decode_utf8/;
 use Test::Base;
 use WWW::GoKGS;
 
-spec_file 'xt/14_tourn_entrants.spec';
+spec_file 'xt/40_tourn_info.spec';
 
 plan skip_all => 'AUTHOR_TESTING is required' unless $ENV{AUTHOR_TESTING};
 plan tests => 1 * blocks;
@@ -15,16 +15,7 @@ my $gokgs = WWW::GoKGS->new( from => 'anazawa@cpan.org' );
 
 my $expected = hash(
     name => sub { defined },
-    entrants => array_of_hashes(
-        position => [ integer(), sub { $_[0] >= 1 } ],
-        name => user_name(),
-        rank => user_rank(),
-        standing => sub { defined },
-        score => [ real(), sub { $_[0] >= 0 } ],
-        sos => [ real(), sub { $_[0] >= 0 } ],
-        sodos => [ real(), sub { $_[0] >= 0 } ],
-        notes => sub { defined },
-    ),
+    description => sub { defined },
     links => hash(
         rounds => array_of_hashes(
             round => [ integer(), sub { $_[0] >= 1 } ],
@@ -35,17 +26,17 @@ my $expected = hash(
     ),
 );
 
-run {
+run { 
     my $block = shift;
-    my $got = $gokgs->tourn_entrants->scrape( $block->input );
+    my $got = $gokgs->tourn_info->scrape( $block->input );
     is_deeply $got, $block->expected if defined $block->expected;
     cmp_deeply $got, $expected unless defined $block->expected;
 };
 
 sub build_uri {
-    $gokgs->tourn_entrants->build_uri( @_ );
+    $gokgs->tourn_info->build_uri( @_ );
 }
 
 sub html {
-    ( @_, $gokgs->tourn_entrants->build_uri );
+    ( @_, $gokgs->tourn_info->build_uri );
 }

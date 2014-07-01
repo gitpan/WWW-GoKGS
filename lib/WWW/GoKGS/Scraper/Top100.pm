@@ -2,7 +2,7 @@ package WWW::GoKGS::Scraper::Top100;
 use strict;
 use warnings FATAL => 'all';
 use parent qw/WWW::GoKGS::Scraper/;
-use Web::Scraper;
+use WWW::GoKGS::Scraper::Declare;
 
 sub base_uri { 'http://www.gokgs.com/top100.jsp' }
 
@@ -12,7 +12,7 @@ sub _build_scraper {
     scraper {
         process '//table[@class="grid"]//following-sibling::tr',
                 'players[]' => scraper {
-                    process '//td[1]', 'position' => [ 'TEXT', sub { int } ];
+                    process '//td[1]', 'position' => 'TEXT';
                     process '//td[2]//a', 'name' => 'TEXT';
                     process '//td[2]//a', 'uri' => '@href';
                     process '//td[3]', 'rank' => 'TEXT'; };

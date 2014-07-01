@@ -2,8 +2,8 @@ package WWW::GoKGS::Scraper::TournGames;
 use strict;
 use warnings FATAL => 'all';
 use parent qw/WWW::GoKGS::Scraper/;
-use Web::Scraper;
-use WWW::GoKGS::Scraper::Filters qw/datetime/;
+use WWW::GoKGS::Scraper::Declare;
+use WWW::GoKGS::Scraper::Filters qw/datetime game_result/;
 use WWW::GoKGS::Scraper::TournLinks qw/process_links/;
 
 sub base_uri { 'http://www.gokgs.com/tournGames.jsp' }
@@ -19,22 +19,6 @@ sub _build_scraper {
             : undef;
     };
 
-    my $result = do {
-        # use SGF-compatible format whenever possible
-        my %canonical = (
-            'W+Res.'  => 'W+Resign',
-            'B+Res.'  => 'B+Resign',
-            'W+Forf.' => 'W+Forfeit',
-            'B+Forf.' => 'B+Forfeit',
-            'Jigo'    => 'Draw',
-        );
-
-        sub {
-            my $r = shift;
-            $canonical{$r} || $r;
-        };
-    };
-
     my $game = scraper {
         process '//td[1]/a', 'sgf_uri' => '@href';
         process '//td[2]', 'white' => [ 'TEXT', $player ];
@@ -42,7 +26,7 @@ sub _build_scraper {
         process '//td[3]', 'maybe_bye' => 'TEXT';
         process '//td[4]', 'setup' => 'TEXT';
         process '//td[5]', 'start_time' => [ 'TEXT', \&datetime ];
-        process '//td[6]', 'result' => [ 'TEXT', $result ];
+        process '//td[6]', 'result' => [ 'TEXT', \&game_result ];
     };
 
     scraper {

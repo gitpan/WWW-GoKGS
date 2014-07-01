@@ -16,7 +16,7 @@
    "no_index" : {
       "directory" : [
          "t",
-         "tx",
+         "xt",
          "examples"
       ]
    },
@@ -27,6 +27,10 @@
          }
       },
       "runtime" : {
+         "recommends" : {
+            "HTML::TreeBuilder::LibXML" : "0",
+            "Web::Scraper::LibXML" : "0"
+         },
          "requires" : {
             "Carp" : "0",
             "Exporter" : "0",
@@ -40,7 +44,6 @@
       "test" : {
          "requires" : {
             "Encode" : "0",
-            "Path::Class" : "0",
             "Test::Base" : "0",
             "Test::Deep" : "0",
             "Test::Exception" : "0",
@@ -52,10 +55,13 @@
    "provides" : {
       "WWW::GoKGS" : {
          "file" : "lib/WWW/GoKGS.pm",
-         "version" : "0.16"
+         "version" : "0.17"
       },
       "WWW::GoKGS::Scraper" : {
          "file" : "lib/WWW/GoKGS/Scraper.pm"
+      },
+      "WWW::GoKGS::Scraper::Declare" : {
+         "file" : "lib/WWW/GoKGS/Scraper/Declare.pm"
       },
       "WWW::GoKGS::Scraper::Filters" : {
          "file" : "lib/WWW/GoKGS/Scraper/Filters.pm"
@@ -91,5 +97,5 @@
          "url" : "git://github.com/anazawa/p5-WWW-GoKGS.git"
       }
    },
-   "version" : "0.16"
+   "version" : "0.17"
 }

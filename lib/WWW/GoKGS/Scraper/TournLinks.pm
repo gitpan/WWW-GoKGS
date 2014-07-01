@@ -2,7 +2,7 @@ package WWW::GoKGS::Scraper::TournLinks;
 use strict;
 use warnings FATAL => 'all';
 use Exporter qw/import/;
-use Web::Scraper;
+use WWW::GoKGS::Scraper::Declare;
 use WWW::GoKGS::Scraper::Filters qw/datetime/;
 
 our @EXPORT_OK = qw( process_links );
@@ -31,11 +31,11 @@ sub process_links {
     );
 
     process '//div[@class="tournData"]', 'links' => scraper {
-        process '//ul[starts-with(preceding-sibling::p/text(), "Entrants")]//li',
+        process '//ul[1]//li',
                 'entrants[]' => scraper {
                     process 'a', 'sort_by' => [ 'TEXT', sub { s/^By // } ];
                     process 'a', 'uri' => '@href'; };
-        process '//ul[starts-with(preceding-sibling::p/text(), "Games")]//li',
+        process '//ul[2]//li',
                 'rounds[]' => scraper {
                     process '.', 'round' => [ 'TEXT', $round ];
                     process '.', 'start_time' => [ 'TEXT', @start_time ];

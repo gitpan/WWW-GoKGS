@@ -5,7 +5,7 @@ use Test::Base;
 use Test::More;
 use WWW::GoKGS;
 
-spec_file 'xt/12_tourn_list.spec';
+spec_file 'xt/30_tourn_list.spec';
 
 plan skip_all => 'AUTHOR_TESTING is required' unless $ENV{AUTHOR_TESTING};
 plan tests => 1 * blocks;

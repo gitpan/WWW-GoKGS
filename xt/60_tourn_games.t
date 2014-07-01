@@ -5,7 +5,7 @@ use Encode qw/decode_utf8/;
 use Test::Base;
 use WWW::GoKGS;
 
-spec_file 'xt/15_tourn_games.spec';
+spec_file 'xt/60_tourn_games.spec';
 
 plan skip_all => 'AUTHOR_TESTING is required' unless $ENV{AUTHOR_TESTING};
 plan tests => 1 * blocks;

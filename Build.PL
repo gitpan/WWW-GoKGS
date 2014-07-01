@@ -18,7 +18,6 @@ my $build = Module::Build->new(
         'Web::Scraper' => 0,
     },
     test_requires => {
-        'Path::Class' => 0,
         'Test::Exception' => 0,
         'Test::More' => '0.98',
         'Time::Piece' => 0,
@@ -26,10 +25,14 @@ my $build = Module::Build->new(
         'Test::Base' => 0,
         'Encode' => 0,
     },
+    recommends => {
+        'Web::Scraper::LibXML' => 0,
+        'HTML::TreeBuilder::LibXML' => 0,
+    },
     test_files => [ 't/', 'xt/' ],
     meta_merge => {
         no_index => {
-            directory => [ 't', 'tx', 'examples' ],
+            directory => [ 't', 'xt', 'examples' ],
         },
         resources => {
             repository => 'git://github.com/anazawa/p5-WWW-GoKGS.git',
