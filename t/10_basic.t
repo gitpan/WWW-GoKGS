@@ -36,18 +36,30 @@ subtest 'WWW::GoKGS' => sub {
     like $gokgs->agent, qr{^WWW::GoKGS/\d\.\d\d$};
 
     can_ok $gokgs, qw(
+        get
         get_scraper
         each_scraper
         can_scrape
         scrape
     );
 
-    cmp_ok $gokgs->get_scraper('/top100.jsp'), '==', $gokgs->top_100;
+    is $gokgs->get_scraper( '/top100.jsp' ), $gokgs->top_100;
+    ok !defined $gokgs->get_scraper( '/fooBar.jsp' );
 
-    ok $gokgs->can_scrape( '/gameArchives.jsp?user=foo' );
-    ok $gokgs->can_scrape( 'http://www.gokgs.com/top100.jsp' );
-    ok !$gokgs->can_scrape( '/fooBar.jsp?baz=qux' );
-    ok !$gokgs->can_scrape( 'http://www.example.com/top100.jsp' );
+    is $gokgs->can_scrape( '/gameArchives.jsp?user=foo' ),
+       $gokgs->game_archives,
+       'can_scrape: ralative URL';
+
+    is $gokgs->can_scrape( 'http://www.gokgs.com/top100.jsp' ),
+       $gokgs->top_100,
+       'can_scrape: absolute URL';
+
+    is $gokgs->can_scrape( 'http://www.gokgs.com:80/top100.jsp' ),
+       $gokgs->top_100,
+       'can_scrape: absolute URL with port number';
+
+    ok !defined $gokgs->can_scrape( '/fooBar.jsp?baz=qux' );
+    ok !defined $gokgs->can_scrape( 'http://www.example.com/top100.jsp' );
 
     $gokgs->each_scraper(sub {
         my ( $path, $scraper ) = @_;

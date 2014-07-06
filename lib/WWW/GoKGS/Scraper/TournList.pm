@@ -1,17 +1,17 @@
 package WWW::GoKGS::Scraper::TournList;
 use strict;
-use warnings FATAL => 'all';
+use warnings;
 use parent qw/WWW::GoKGS::Scraper/;
 use WWW::GoKGS::Scraper::Declare;
 
 sub base_uri { 'http://www.gokgs.com/tournList.jsp' }
 
-sub _build_scraper {
+sub __build_scraper {
     my $self = shift;
 
     my %tournament = (
         name => 'TEXT',
-        uri  => '@href',
+        uri => '@href',
     );
 
     my %year_index = (

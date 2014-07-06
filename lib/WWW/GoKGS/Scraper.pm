@@ -9,9 +9,9 @@ sub base_uri {
 }
 
 sub build_uri {
-    my ( $class, @args ) = @_;
+    my ( $class, @query ) = @_;
     my $uri = URI->new( $class->base_uri );
-    $uri->query_form( @args ) if @args;
+    $uri->query_form( @query ) if @query;
     $uri;
 }
 
@@ -35,11 +35,11 @@ sub init {
 
 sub _scraper {
     my $self = shift;
-    $self->{scraper} ||= $self->_build_scraper;
+    $self->{_scraper} ||= $self->__build_scraper;
 }
 
-sub _build_scraper {
-    croak 'call to abstract method ', __PACKAGE__, '::_build_scraper';
+sub __build_scraper {
+    croak 'call to abstract method ', __PACKAGE__, '::__build_scraper';
 }
 
 sub user_agent {
@@ -53,8 +53,8 @@ sub scrape {
 }
 
 sub query {
-    my ( $self, @args ) = @_;
-    $self->scrape( ref($self)->build_uri(@args) );
+    my ( $self, @query ) = @_;
+    $self->scrape( ref($self)->build_uri(@query) );
 }
 
 1;
@@ -72,7 +72,7 @@ WWW::GoKGS::Scraper - Abstract base class for KGS scrapers
 
   sub base_uri { 'http://www.gokgs.com/...' }
 
-  sub _build_scraper {
+  sub __build_scraper {
       my $self = shift;
 
       scraper {
@@ -92,7 +92,7 @@ inherit from this class, and also implement the following methods:
 Must return a URI string which represents a resource on KGS.
 This method is called as a method on the class.
 
-=item _build_scraper
+=item __build_scraper
 
 Must return an L<Web::Scraper> object which can C<scrape> the resource.
 This method is called as a method on the object.

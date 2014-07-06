@@ -109,10 +109,20 @@ DESCRIPTION
         Can be used to get or set the product token that is used to send the
         User-Agent request header.
 
-    $bool = $gokgs->can_scrape( '/fooBar.jsp' )
-    $bool = $gokgs->can_scrape( 'http://www.gokgs.com/fooBar.jsp' )
-        Returns a Boolean value telling whether $gokgs can "scrape" the
-        resource specified by the given URL.
+    $Response = $gokgs->get( URI->new(...) )
+        A shortcut for:
+
+          my $response = $gokgs->user_agent->get( URI->new(...) );
+
+        This method is used by "scrape" method to "GET" the requested
+        resource. You can override this method by subclassing.
+
+    $scraper = $gokgs->can_scrape( '/fooBar.jsp' )
+    $scraper = $gokgs->can_scrape( 'http://www.gokgs.com/fooBar.jsp' )
+        Returns a scraper object which can "scrape" the resource specified
+        by the given URL. If the scraper object does not exist, then "undef"
+        is returned. This method can be used to check whether $gokgs can
+        "scrape" the resource.
 
     $HashRef = $gokgs->scrape( '/gameArchives.jsp?user=foo' )
     $HashRef = $gokgs->scrape(
@@ -194,12 +204,44 @@ DESCRIPTION
               $scraper->user_agent( $gokgs->user_agent );
           });
 
+DIAGNOSTICS
+    This module throws the following exceptions:
+
+    LWP::RobotUA from required
+        This message is printed by the constructor of LWP::RobotUA. You must
+        provide your email address when you use the module.
+
+          my $gokgs = WWW::GoKGS->new(
+              from => 'user@example.com'
+          );
+
+    Don't know how to scrape '/fooBar.jsp'
+        You tried to "scrape" a resource which $gokgs can't handle. Use
+        "can_scrape" before invoke the "scrape" method.
+
+          # scrape safely
+          if ( $gokgs->can_scrape('/fooBar.jsp') ) {
+              my $result = $gokgs->scrape('/fooBar.jsp');
+          }
+
+    GET /fooBar.jsp failed: ...
+        $gokgs failed to "GET" the requested resource. The reason phrase is
+        added to the end of the message.
+
+LIMITATIONS
+    Although KGS website allows you to set a locale and time zone by using
+    HTTP cookie, this module ignores the settings. The scrapers assume the
+    locale is set to "en_US", and the time zone "GMT".
+
+      # not supported
+      $gokgs->user_agent->cookie_jar(...);
+
 ENVIRONMENTAL VARIABLES
     WWW_GOKGS_LIBXML
         If set to true, this module uses HTML::TreeBuilder::LibXML instead
-        of HTML::TreeBuilder to parse HTML documents. Make sure to install
-        the alternative module in addition to this module before you enable
-        the flag.
+        of HTML::TreeBuilder::XPath to parse HTML documents. Make sure to
+        install the alternative module in addition to this module before you
+        enable the flag.
 
           BEGIN { $ENV{WWW_GOKGS_LIBXML} = 1 }
           use WWW::GoKGS;

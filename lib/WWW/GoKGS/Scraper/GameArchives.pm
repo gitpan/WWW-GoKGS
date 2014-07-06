@@ -1,13 +1,13 @@
 package WWW::GoKGS::Scraper::GameArchives;
 use strict;
-use warnings FATAL => 'all';
+use warnings;
 use parent qw/WWW::GoKGS::Scraper/;
 use WWW::GoKGS::Scraper::Declare;
 use WWW::GoKGS::Scraper::Filters qw/game_result datetime/;
 
 sub base_uri { 'http://www.gokgs.com/gameArchives.jsp' }
 
-sub _build_scraper {
+sub __build_scraper {
     my $self = shift;
 
     my $month2num = do {
@@ -18,14 +18,14 @@ sub _build_scraper {
 
     my %user = (
         name => [ 'TEXT', sub { s/ \[[^\]]+\]$// } ],
-        rank => [ 'TEXT', sub { m/ \[([^\]]+)\]$/ ? $1 : undef } ],
+        rank => [ 'TEXT', sub { m/ \[([^\]]+)\]$/ && $1 } ],
         uri  => '@href',
     );
 
     my $game = scraper {
-        process '//a[contains(@href, ".sgf")]', 'sgf_uri' => '@href';
-        process '//td[2]//a', 'white[]' => \%user;
-        process '//td[3]//a', 'black[]' => \%user;
+        process '//td[1]/a', 'sgf_uri' => '@href';
+        process '//td[2]/a', 'white[]' => \%user;
+        process '//td[3]/a', 'black[]' => \%user;
         process '//td[3]', 'maybe_setup' => 'TEXT';
         process '//td[4]', 'setup' => 'TEXT';
         process '//td[5]', 'start_time' => 'TEXT';
@@ -61,7 +61,7 @@ sub scrape {
     my @calendar;
     for my $calendar ( @{$result->{calendar}} ) {
         for my $month ( @{$calendar->{month}} ) {
-            $month->{year} = int $calendar->{year};
+            $month->{year} = $calendar->{year};
             push @calendar, $month;
         }
     }
@@ -78,7 +78,8 @@ sub scrape {
     for my $game ( @{$result->{games}} ) {
         next if exists $game->{black};
 
-        my $users = $game->{white}; # <td colspan="2">
+        # <td colspan="2">
+        my $users = $game->{white};
         if ( @$users == 1 ) { # Type: Demonstration
             $game->{owner} = $users->[0];
         }
@@ -106,8 +107,8 @@ sub scrape {
         $game->{start_time} = datetime( $game->{start_time} );
         $game->{result}     = game_result( $game->{result} );
         $game->{setup}      =~ /^(\d+)\x{d7}\d+ (?:H(\d+))?$/;
-        $game->{board_size} = int $1;
-        $game->{handicap}   = int $2 if $2;
+        $game->{board_size} = $1;
+        $game->{handicap}   = $2 if defined $2;
 
         for my $user (
             $game->{owner} || (),

@@ -1,20 +1,21 @@
 package WWW::GoKGS::Scraper::TournInfo;
 use strict;
-use warnings FATAL => 'all';
+use warnings;
 use parent qw/WWW::GoKGS::Scraper/;
 use WWW::GoKGS::Scraper::Declare;
-use WWW::GoKGS::Scraper::TournLinks qw/process_links/;
+use WWW::GoKGS::Scraper::TournLinks;
 
 sub base_uri { 'http://www.gokgs.com/tournInfo.jsp' }
 
-sub _build_scraper {
+sub __build_scraper {
     my $self = shift;
+    my $links = $self->__build_tourn_links;
 
     scraper {
         process '//h1', 'name' => [ 'TEXT', sub { s/ \([^)]+\)$// } ];
         process '//node()[preceding-sibling::h1 and following-sibling::div]',
                 'description[]' => sub { $_[0]->as_XML };
-        process_links;
+        process '//div[@class="tournData"]', 'links' => $links; 
     };
 }
 

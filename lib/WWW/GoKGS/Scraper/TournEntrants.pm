@@ -4,14 +4,16 @@ use warnings;
 use parent qw/WWW::GoKGS::Scraper/;
 use WWW::GoKGS::Scraper::Declare;
 use WWW::GoKGS::Scraper::Filters qw/datetime/;
-use WWW::GoKGS::Scraper::TournLinks qw/process_links/;
+use WWW::GoKGS::Scraper::TournLinks;
 
 sub base_uri { 'http://www.gokgs.com/tournEntrants.jsp' }
 
-sub _build_scraper {
+sub __build_scraper {
     my $self = shift;
+    my $links = $self->__build_tourn_links;
+
     my $name = sub { s/ \[[^\]]+\]$// };
-    my $rank = sub { m/ \[([^\]]+)\]$/ ? $1 : undef };
+    my $rank = sub { m/ \[([^\]]+)\]$/ && $1 };
 
     scraper {
         process '//h1', 'name' => [ 'TEXT', sub { s/ Players$// } ];
@@ -33,7 +35,7 @@ sub _build_scraper {
                 'entrants[]' => scraper { # Round Robin
                     process '//td', 'columns[]' => 'TEXT';
                     result 'columns'; };
-        process_links;
+        process '//div[@class="tournData"]', 'links' => $links; 
     };
 }
 
@@ -56,7 +58,7 @@ sub scrape {
                 name     => shift @$entrant,
                 number   => shift @$entrant,
                 notes    => pop @$entrant,
-                score    => 0 + pop @$entrant,
+                score    => pop @$entrant,
                 results  => $entrant,
             };
         }
@@ -98,11 +100,6 @@ sub scrape {
             $entrant->{position} = $preceding->{position};
         }
         continue {
-            $entrant->{position} = int $entrant->{position};
-            $entrant->{sos}      += 0;
-            $entrant->{sodos}    += 0;
-            $entrant->{score}    += 0;
-
             $preceding = $entrant;
         }
     }

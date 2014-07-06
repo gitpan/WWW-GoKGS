@@ -1,20 +1,19 @@
 package WWW::GoKGS::Scraper::TournLinks;
 use strict;
-use warnings FATAL => 'all';
+use warnings;
 use Exporter qw/import/;
 use WWW::GoKGS::Scraper::Declare;
 use WWW::GoKGS::Scraper::Filters qw/datetime/;
 
-our @EXPORT_OK = qw( process_links );
+our @EXPORT = qw( __build_tourn_links );
 
-sub process_links {
-    my %filter = @_;
-    my $round = sub { m/^Round (\d+) / ? int $1 : undef };
+sub __build_tourn_links {
+    my $self = shift;
 
     my @start_time = (
         sub {
             my $time = m/ will start at (.*)$/ && $1;
-            $time ||= m/\(([^\-]+) -/ ? $1 : undef;
+            $time ||= m/\(([^\-]+) -/ && $1;
             $time =~ tr/\x{a0}/ / if $time;
             $time;
         },
@@ -23,24 +22,28 @@ sub process_links {
 
     my @end_time = (
         sub {
-            my $time = m/- ([^)]+)\)$/ ? $1 : undef;
+            my $time = m/- ([^)]+)\)$/ && $1;
             $time =~ tr/\x{a0}/ / if $time;
             $time;
         },
         \&datetime,
     );
 
-    process '//div[@class="tournData"]', 'links' => scraper {
-        process '//ul[1]//li',
-                'entrants[]' => scraper {
-                    process 'a', 'sort_by' => [ 'TEXT', sub { s/^By // } ];
-                    process 'a', 'uri' => '@href'; };
-        process '//ul[2]//li',
-                'rounds[]' => scraper {
-                    process '.', 'round' => [ 'TEXT', $round ];
-                    process '.', 'start_time' => [ 'TEXT', @start_time ];
-                    process 'a', 'end_time' => [ 'TEXT', @end_time ];
-                    process 'a', 'uri' => '@href'; };
+    my %entrants = (
+        sort_by => [ 'TEXT', sub { s/^By // } ],
+        uri => '@href',
+    );
+
+    my $round = scraper {
+        process '.', 'round' => [ 'TEXT', sub { m/^Round (\d+) / && $1 } ];
+        process '.', 'start_time' => [ 'TEXT', @start_time ];
+        process 'a', 'end_time' => [ 'TEXT', @end_time ];
+        process 'a', 'uri' => '@href';
+    };
+
+    scraper {
+        process '//ul[1]//li//a', 'entrants[]' => \%entrants;
+        process '//ul[2]//li', 'rounds[]' => $round;
     };
 }
 
