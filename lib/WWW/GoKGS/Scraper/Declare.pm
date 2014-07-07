@@ -1,19 +1,23 @@
 package WWW::GoKGS::Scraper::Declare;
 use strict;
 use warnings;
-use Exporter qw/import/;
+use parent qw/Web::Scraper/;
+use HTML::TreeBuilder::XPath;
 
-our @EXPORT = qw( scraper process process_first result );
+sub _tree_builder_class {
+    my $self = shift;
+    $self->{_tree_builder_class} = shift if @_;
+    $self->{_tree_builder_class} ||= 'HTML::TreeBuilder::XPath';
+}
 
-BEGIN {
-    if ( $ENV{WWW_GOKGS_LIBXML} ) {
-        require Web::Scraper::LibXML;
-        Web::Scraper::LibXML->import;
-    }
-    else {
-        require Web::Scraper;
-        Web::Scraper->import;
-    }
+sub build_tree {
+    my ( $self, $html ) = @_;
+    my $tree = $self->_tree_builder_class->new;
+    $tree->store_comments(1);
+    $tree->ignore_unknown(0);
+    $tree->parse($html);
+    $tree->eof;
+    $tree;
 }
 
 1;

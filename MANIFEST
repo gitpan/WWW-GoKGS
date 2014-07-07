@@ -3,6 +3,7 @@ Build.PL
 Changes
 examples/gokgs.psgi
 lib/WWW/GoKGS.pm
+lib/WWW/GoKGS/LibXML.pm
 lib/WWW/GoKGS/Scraper.pm
 lib/WWW/GoKGS/Scraper/Declare.pm
 lib/WWW/GoKGS/Scraper/Filters.pm

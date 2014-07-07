@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use xt::Util qw/:cmp_deeply/;
+use xt::Util qw/build_gokgs :cmp_deeply/;
 use Test::Base;
 use Test::More;
 use WWW::GoKGS;
@@ -10,8 +10,7 @@ spec_file 'xt/30_tourn_list.spec';
 plan skip_all => 'AUTHOR_TESTING is required' unless $ENV{AUTHOR_TESTING};
 plan tests => 1 * blocks;
 
-my $gokgs = WWW::GoKGS->new( from => 'anazawa@cpan.org' );
-   $gokgs->user_agent->delay( 1/60 );
+my $gokgs = build_gokgs();
 
 my $expected = hash(
     tournaments => array_of_hashes(

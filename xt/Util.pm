@@ -19,7 +19,24 @@ our %EXPORT_TAGS = (
     )],
 );
 
-our @EXPORT_OK = map { @$_ } values %EXPORT_TAGS;
+our @EXPORT_OK = ( 'build_gokgs', map { @$_ } values %EXPORT_TAGS );
+
+sub build_gokgs {
+    my $gokgs = do {
+        if ( $ENV{WWW_GOKGS_LIBXML} ) {
+            require WWW::GoKGS::LibXML;
+            WWW::GoKGS::LibXML->new( from => 'anazawa@cpan.org' );
+        }
+        else {
+            require WWW::GoKGS;
+            WWW::GoKGS->new( from => 'anazawa@cpan.org' );
+        }
+    };
+
+    $gokgs->user_agent->delay( 1/60 );
+
+    $gokgs;
+}
 
 sub cmp_deeply {
     my ( $got, $expected, $name ) = @_;

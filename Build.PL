@@ -26,7 +26,6 @@ my $build = Module::Build->new(
         'Encode' => 0,
     },
     recommends => {
-        'Web::Scraper::LibXML' => 0,
         'HTML::TreeBuilder::LibXML' => 0,
     },
     test_files => [ 't/', 'xt/' ],

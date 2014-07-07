@@ -28,7 +28,9 @@ sub new {
 sub init {
     my ( $self, $args ) = @_;
 
-    $self->user_agent( $args->{user_agent} ) if exists $args->{user_agent};
+    for my $method (qw/user_agent _tree_builder_class/) {
+        $self->$method( $args->{$method} ) if exists $args->{$method};
+    }
 
     return;
 }
@@ -40,6 +42,11 @@ sub _scraper {
 
 sub __build_scraper {
     croak 'call to abstract method ', __PACKAGE__, '::__build_scraper';
+}
+
+sub _tree_builder_class {
+    my ( $self, @args ) = @_;
+    $self->_scraper->_tree_builder_class( @args );
 }
 
 sub user_agent {
@@ -68,7 +75,7 @@ WWW::GoKGS::Scraper - Abstract base class for KGS scrapers
 =head1 SYNOPSIS
 
   use parent 'WWW::GoKGS::Scraper';
-  use Web::Scraper;
+  use WWW::GoKGS::Scraper::Declare;
 
   sub base_uri { 'http://www.gokgs.com/...' }
 
@@ -135,13 +142,30 @@ shared by L<Web::Scraper> users (C<$Web::Scraper::UserAgent>).
 =item $scraper->scrape( \$html[, $base_uri] )
 
 Given arguments are passed to the C<scrape> method of
-an L<Web::Scraper> object built by the C<_build_scraper> method.
+an L<Web::Scraper> object built by the C<__build_scraper> method.
 
 =item $scraper->query( $k1 => $v1, $k2 => $v2, ... )
 
 Given key-value pairs of query parameters, constructs a L<URI> object
 which consists of C<base_uri> and the parameters, then pass the C<URI>
 to the C<scrape> method.
+
+=back
+
+=head2 INTERNAL METHODS
+
+=over 4
+
+=item $class_name = $scraper->_tree_builder_class
+
+=item $scraper->_tree_builder_class( 'HTTP::TreeBuilder::XPath' )
+
+Can be used to get or set a class name which is used to C<build_tree>.
+Defaults to L<HTML::TreeBuilder::XPath>.
+You shouldn't modify this attribute unless you understand what you're doing.
+
+  use HTML::TreeBuilder::LibXML;
+  $scraper->_tree_builder_class( 'HTML::TreeBuilder::LibXML' );
 
 =back
 

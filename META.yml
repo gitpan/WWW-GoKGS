@@ -26,7 +26,10 @@ no_index:
 provides:
   WWW::GoKGS:
     file: lib/WWW/GoKGS.pm
-    version: '0.18'
+    version: '0.19'
+  WWW::GoKGS::LibXML:
+    file: lib/WWW/GoKGS/LibXML.pm
+    version: '0.19'
   WWW::GoKGS::Scraper:
     file: lib/WWW/GoKGS/Scraper.pm
   WWW::GoKGS::Scraper::Declare:
@@ -49,7 +52,6 @@ provides:
     file: lib/WWW/GoKGS/Scraper/TournList.pm
 recommends:
   HTML::TreeBuilder::LibXML: '0'
-  Web::Scraper::LibXML: '0'
 requires:
   Carp: '0'
   Exporter: '0'
@@ -61,4 +63,4 @@ requires:
 resources:
   license: http://dev.perl.org/licenses/
   repository: git://github.com/anazawa/p5-WWW-GoKGS.git
-version: '0.18'
+version: '0.19'

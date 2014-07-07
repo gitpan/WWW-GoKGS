@@ -12,9 +12,11 @@ sub __build_scraper {
     my $self = shift;
     my $links = $self->__build_tourn_links;
 
-    my $name = sub { s/ Round \d+ Games$// };
-    my $round = sub { m/ Round (\d+) Games$/ && $1 };
-    
+    my %h1 = (
+        name => [ 'TEXT', sub { s/ Round \d+ Games$// } ],
+        round => [ 'TEXT', sub { m/ Round (\d+) Games$/ && $1 } ],
+    );
+
     my %player = (
         name => [ 'TEXT', sub { s/ \[[^\]]+\]$// } ],
         rank => [ 'TEXT', sub { m/ \[([^\]]+)\]$/ && $1 } ],
@@ -23,16 +25,15 @@ sub __build_scraper {
     my $game = scraper {
         process '//td[1]/a', 'sgf_uri' => '@href';
         process '//td[2]', 'white' => \%player;
-        process '//td[3]', 'black' => \%player;
-        process '//td[3]', 'maybe_bye' => 'TEXT';
+        process '//td[3]', 'black' => \%player,
+                           'maybe_bye' => 'TEXT';
         process '//td[4]', 'setup' => 'TEXT';
         process '//td[5]', 'start_time' => [ 'TEXT', \&datetime ];
         process '//td[6]', 'result' => [ 'TEXT', \&game_result ];
     };
 
     scraper {
-        process '//h1', 'name' => [ 'TEXT', $name ];
-        process '//h1', 'round' => [ 'TEXT', $round ];
+        process '//h1', %h1;
         process '//table[@class="grid"]//following-sibling::tr',
                 'games[]' => $game;
         process '//a[text()="Previous round"]', 'previous_round_uri' => '@href';

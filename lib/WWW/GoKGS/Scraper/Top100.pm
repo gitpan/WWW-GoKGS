@@ -13,8 +13,8 @@ sub __build_scraper {
         process '//table[@class="grid"]//following-sibling::tr',
                 'players[]' => scraper {
                     process '//td[1]', 'position' => 'TEXT';
-                    process '//td[2]/a', 'name' => 'TEXT';
-                    process '//td[2]/a', 'uri' => '@href';
+                    process '//td[2]/a', 'name' => 'TEXT',
+                                         'uri' => '@href';
                     process '//td[3]', 'rank' => 'TEXT'; };
     };
 }

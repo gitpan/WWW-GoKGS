@@ -1,5 +1,18 @@
 Revision history for Perl extension WWW::GoKGS.
 
+0.19 Jul 7th, 2014
+
+  - Add WWW::GoKGS::LibXML
+
+  [INTERNAL]
+
+    - Add WWW::GoKGS::Scraper#_tree_builder_class
+
+  [INCOMPATIBLE CHANGES]
+
+    - WWW::GoKGS does not consult $ENV{WWW_GOKGS_LIBXML} anymore.
+      Use WWW::GoKGS::LibXML instead.
+
 0.18 Jul 6th, 2014
 
   - Add WWW::GoKGS#get

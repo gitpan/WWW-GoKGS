@@ -12,24 +12,24 @@ sub __build_scraper {
     my $self = shift;
     my $links = $self->__build_tourn_links;
 
-    my $name = sub { s/ \[[^\]]+\]$// };
-    my $rank = sub { m/ \[([^\]]+)\]$/ && $1 };
+    my %user = (
+        name => [ 'TEXT', sub { s/ \[[^\]]+\]$// } ],
+        rank => [ 'TEXT', sub { m/ \[([^\]]+)\]$/ && $1 } ],
+    );
 
     scraper {
         process '//h1', 'name' => [ 'TEXT', sub { s/ Players$// } ];
         process '//table[tr/th[3]/text()="Score"]//following-sibling::tr',
                 'entrants[]' => scraper { # Swiss or McMahon
                     process '//td[1]', 'position' => 'TEXT';
-                    process '//td[2]', 'name' => [ 'TEXT', $name ];
-                    process '//td[2]', 'rank' => [ 'TEXT', $rank ];
+                    process '//td[2]', %user;
                     process '//td[3]', 'score' => 'TEXT';
                     process '//td[4]', 'sos' => 'TEXT';
                     process '//td[5]', 'sodos' => 'TEXT';
                     process '//td[6]', 'notes' => 'TEXT'; };
         process '//table[tr/th[1]/text()="Name"]//following-sibling::tr',
                 'entrants[]' => scraper { # Single or Double Elimination
-                    process '//td[1]', 'name' => [ 'TEXT', $name ];
-                    process '//td[1]', 'rank' => [ 'TEXT', $rank ];
+                    process '//td[1]', %user;
                     process '//td[2]', 'standing' => 'TEXT'; };
         process '//table[tr/th[3]/text()="#"]//following-sibling::tr',
                 'entrants[]' => scraper { # Round Robin

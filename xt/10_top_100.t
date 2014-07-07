@@ -1,5 +1,6 @@
 use strict;
 use warnings;
+use xt::Util qw/build_gokgs/;
 use Test::Base;
 use Test::Deep;
 use WWW::GoKGS;
@@ -9,8 +10,7 @@ spec_file 'xt/10_top_100.spec';
 plan skip_all => 'AUTHOR_TESTING is required' unless $ENV{AUTHOR_TESTING};
 plan tests => 1 * blocks;
 
-my $gokgs = WWW::GoKGS->new( from => 'anazawa@cpan.org' );
-   $gokgs->user_agent->delay( 1/60 );
+my $gokgs = build_gokgs();
 
 my $expected = {
    players => array_each({

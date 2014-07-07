@@ -3,6 +3,7 @@ use 5.008_009;
 use strict;
 use warnings;
 use Carp qw/croak/;
+use HTML::TreeBuilder::XPath;
 use LWP::RobotUA;
 use URI;
 use WWW::GoKGS::Scraper::GameArchives;
@@ -12,39 +13,9 @@ use WWW::GoKGS::Scraper::TournInfo;
 use WWW::GoKGS::Scraper::TournEntrants;
 use WWW::GoKGS::Scraper::TournGames;
 
-our $VERSION = '0.18';
+our $VERSION = '0.19';
 
-BEGIN { # install scrapers
-    my %scrapers = (
-        game_archives  => 'WWW::GoKGS::Scraper::GameArchives',
-        top_100        => 'WWW::GoKGS::Scraper::Top100',
-        tourn_list     => 'WWW::GoKGS::Scraper::TournList',
-        tourn_info     => 'WWW::GoKGS::Scraper::TournInfo',
-        tourn_entrants => 'WWW::GoKGS::Scraper::TournEntrants',
-        tourn_games    => 'WWW::GoKGS::Scraper::TournGames',
-    );
-
-    my %paths;
-    while ( my ($method, $class) = each %scrapers ) {
-        my $path = $paths{$class} = $class->build_uri->path;
-        my $body = sub { $_[0]->get_scraper($path) };
-        no strict 'refs';
-        *$method = $body;
-    }
-
-    sub __build_scrapers {
-        my $self = shift;
-
-        my %_scrapers;
-        while ( my ($class, $path) = each %paths ) {
-            $_scrapers{$path} = $class->new(
-                user_agent => $self->user_agent,
-            );
-        }
-
-        \%_scrapers;
-    }
-}
+sub _tree_builder_class { 'HTML::TreeBuilder::XPath' }
 
 sub new {
     my $class = shift;
@@ -101,6 +72,40 @@ sub get {
 sub _scrapers {
     my $self = shift;
     $self->{_scrapers} ||= $self->__build_scrapers;
+}
+
+BEGIN { # install scrapers
+    my %scrapers = (
+        game_archives  => 'WWW::GoKGS::Scraper::GameArchives',
+        top_100        => 'WWW::GoKGS::Scraper::Top100',
+        tourn_list     => 'WWW::GoKGS::Scraper::TournList',
+        tourn_info     => 'WWW::GoKGS::Scraper::TournInfo',
+        tourn_entrants => 'WWW::GoKGS::Scraper::TournEntrants',
+        tourn_games    => 'WWW::GoKGS::Scraper::TournGames',
+    );
+
+    my %paths;
+    while ( my ($method, $class) = each %scrapers ) {
+        my $path = $paths{$class} = $class->build_uri->path;
+        my $body = sub { $_[0]->get_scraper($path) };
+        no strict 'refs';
+        *$method = $body;
+    }
+
+    sub __build_scrapers {
+        my $self = shift;
+        my $class = ref $self;
+
+        my %_scrapers;
+        while ( my ($scraper, $path) = each %paths ) {
+            $_scrapers{$path} = $scraper->new(
+                _tree_builder_class => $class->_tree_builder_class,
+                user_agent => $self->user_agent,
+            );
+        }
+
+        \%_scrapers;
+    }
 }
 
 sub get_scraper {
@@ -443,16 +448,6 @@ The scrapers assume the locale is set to C<en_US>, and the time zone C<GMT>.
 =head1 ENVIRONMENTAL VARIABLES
 
 =over 4
-
-=item WWW_GOKGS_LIBXML
-
-If set to true, this module uses L<HTML::TreeBuilder::LibXML>
-instead of L<HTML::TreeBuilder::XPath> to parse HTML documents.
-Make sure to install the alternative module in addition to this module
-before you enable the flag.
-
-  BEGIN { $ENV{WWW_GOKGS_LIBXML} = 1 }
-  use WWW::GoKGS;
 
 =item AUTHOR_TESTING
 
