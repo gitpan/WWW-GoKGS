@@ -34,18 +34,19 @@
     ],
     'rounds' => [
       {
-        'end_time' => '2002-02-11T21:30Z',
+        'end_time' => '2002-02-11T21:30',
         'round' => 1,
-        'start_time' => '2002-02-11T21:00Z',
+        'start_time' => '2002-02-11T21:00',
         'uri' => bless( do{\(my $o = 'http://www.gokgs.com/tournGames.jsp?id=12&round=1')}, 'URI::http' )
       },
       {
-        'end_time' => '2002-02-11T22:00Z',
+        'end_time' => '2002-02-11T22:00',
         'round' => 2,
-        'start_time' => '2002-02-11T21:30Z',
+        'start_time' => '2002-02-11T21:30',
         'uri' => bless( do{\(my $o = 'http://www.gokgs.com/tournGames.jsp?id=12&round=2')}, 'URI::http' )
       }
     ]
   },
-  'name' => 'Demo Tournament'
+  'name' => 'Demo Tournament',
+  'time_zone' => 'GMT'
 }

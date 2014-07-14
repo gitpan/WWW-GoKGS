@@ -36,6 +36,7 @@ my $expected = do {
     };
 
     hash(
+        time_zone => sub { $_[0] eq 'GMT' },
         games => array_of_hashes(
             sgf_uri => [ uri(), sub { $_[0]->path =~ /\.sgf$/ } ],
             owner => hash( %user ),
@@ -43,7 +44,7 @@ my $expected = do {
             black => array_of_hashes( %user ),
             board_size => [ integer(), sub { $_[0] >= 2 && $_[0] <= 38 } ],
             handicap => [ integer(), sub { $_[0] >= 2 } ],
-            start_time => datetime( '%Y-%m-%dT%H:%MZ' ),
+            start_time => datetime( '%Y-%m-%dT%H:%M' ),
             type => $type,
             result => game_result(),
         ),

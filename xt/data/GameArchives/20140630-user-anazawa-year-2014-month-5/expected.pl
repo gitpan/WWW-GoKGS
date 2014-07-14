@@ -1,4 +1,5 @@
 {
+  'time_zone' => 'GMT',
   'calendar' => [
     {
       'month' => 6,
@@ -82,7 +83,7 @@
       },
       'result' => 'Unfinished',
       'sgf_uri' => bless( do{\(my $o = 'http://files.gokgs.com/games/2014/5/19/anazawa-3.sgf')}, 'URI::http' ),
-      'start_time' => '2014-05-19T16:55Z',
+      'start_time' => '2014-05-19T16:55',
       'type' => 'Review',
       'white' => [
         {
@@ -103,7 +104,7 @@
       'board_size' => 19,
       'result' => 'W+15.5',
       'sgf_uri' => bless( do{\(my $o = 'http://files.gokgs.com/games/2014/5/19/anazawa-nnewgo.sgf')}, 'URI::http' ),
-      'start_time' => '2014-05-19T16:04Z',
+      'start_time' => '2014-05-19T16:04',
       'type' => 'Ranked',
       'white' => [
         {
@@ -125,7 +126,7 @@
       'handicap' => 2,
       'result' => 'W+10.5',
       'sgf_uri' => bless( do{\(my $o = 'http://files.gokgs.com/games/2014/5/19/anazawa-ysw.sgf')}, 'URI::http' ),
-      'start_time' => '2014-05-19T13:20Z',
+      'start_time' => '2014-05-19T13:20',
       'type' => 'Ranked',
       'white' => [
         {
@@ -147,7 +148,7 @@
       'handicap' => 4,
       'result' => 'W+21.5',
       'sgf_uri' => bless( do{\(my $o = 'http://files.gokgs.com/games/2014/5/19/anazawa-riki77jr.sgf')}, 'URI::http' ),
-      'start_time' => '2014-05-19T12:17Z',
+      'start_time' => '2014-05-19T12:17',
       'type' => 'Ranked',
       'white' => [
         {
@@ -168,7 +169,7 @@
       'board_size' => 19,
       'result' => 'B+Resign',
       'sgf_uri' => bless( do{\(my $o = 'http://files.gokgs.com/games/2014/5/16/Sushiman-anazawa.sgf')}, 'URI::http' ),
-      'start_time' => '2014-05-16T18:07Z',
+      'start_time' => '2014-05-16T18:07',
       'type' => 'Ranked',
       'white' => [
         {

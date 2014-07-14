@@ -14,6 +14,7 @@ my $gokgs = build_gokgs();
 
 my $expected = hash(
     name => sub { defined },
+    time_zone => sub { $_[0] eq 'GMT' },
     entrants => array_of_hashes(
         position => [ integer(), sub { $_[0] >= 1 } ],
         name => user_name(),
@@ -27,8 +28,8 @@ my $expected = hash(
     links => hash(
         rounds => array_of_hashes(
             round => [ integer(), sub { $_[0] >= 1 } ],
-            start_time => datetime( '%Y-%m-%dT%H:%MZ' ),
-            end_time => datetime( '%Y-%m-%dT%H:%MZ' ),
+            start_time => datetime( '%Y-%m-%dT%H:%M' ),
+            end_time => datetime( '%Y-%m-%dT%H:%M' ),
             uri => [ uri(), sub { $_[0]->path eq '/tournGames.jsp' } ],
         ),
     ),

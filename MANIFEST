@@ -14,6 +14,7 @@ lib/WWW/GoKGS/Scraper/TournGames.pm
 lib/WWW/GoKGS/Scraper/TournInfo.pm
 lib/WWW/GoKGS/Scraper/TournLinks.pm
 lib/WWW/GoKGS/Scraper/TournList.pm
+lib/WWW/GoKGS/Scraper/TzList.pm
 LICENSE
 MANIFEST			This list of files
 META.json
@@ -40,6 +41,9 @@ xt/51_tourn_entrants_libxml.t
 xt/60_tourn_games.spec
 xt/60_tourn_games.t
 xt/61_tourn_games_libxml.t
+xt/70_tz_list.spec
+xt/70_tz_list.t
+xt/71_tz_list.t
 xt/data/GameArchives/20140630-user-anazawa-year-2014-month-5/expected.pl
 xt/data/GameArchives/20140630-user-anazawa-year-2014-month-5/input.html
 xt/data/Top100/20140630/expected.pl
@@ -56,4 +60,6 @@ xt/data/TournInfo/20140616-id-857/expected.pl
 xt/data/TournInfo/20140616-id-857/input.html
 xt/data/TournList/20140616-year-2013/expected.pl
 xt/data/TournList/20140616-year-2013/input.html
+xt/data/TzList/tz-GMT/expected.pl
+xt/data/TzList/tz-GMT/input.html
 xt/Util.pm

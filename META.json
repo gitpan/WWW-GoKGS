@@ -54,11 +54,11 @@
    "provides" : {
       "WWW::GoKGS" : {
          "file" : "lib/WWW/GoKGS.pm",
-         "version" : "0.19"
+         "version" : "0.20"
       },
       "WWW::GoKGS::LibXML" : {
          "file" : "lib/WWW/GoKGS/LibXML.pm",
-         "version" : "0.19"
+         "version" : "0.20"
       },
       "WWW::GoKGS::Scraper" : {
          "file" : "lib/WWW/GoKGS/Scraper.pm"
@@ -89,6 +89,9 @@
       },
       "WWW::GoKGS::Scraper::TournList" : {
          "file" : "lib/WWW/GoKGS/Scraper/TournList.pm"
+      },
+      "WWW::GoKGS::Scraper::TzList" : {
+         "file" : "lib/WWW/GoKGS/Scraper/TzList.pm"
       }
    },
    "release_status" : "stable",
@@ -100,5 +103,5 @@
          "url" : "git://github.com/anazawa/p5-WWW-GoKGS.git"
       }
    },
-   "version" : "0.19"
+   "version" : "0.20"
 }

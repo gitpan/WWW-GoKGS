@@ -13,6 +13,7 @@ sub __build_scraper {
 
     scraper {
         process '//h1', 'name' => [ 'TEXT', sub { s/ \([^)]+\)$// } ];
+        process '//a[@href="tzList.jsp"]', 'time_zone' => 'TEXT';
         process '//node()[preceding-sibling::h1 and following-sibling::div]',
                 'description[]' => sub { $_[0]->as_XML };
         process '//div[@class="tournData"]', 'links' => $links; 
@@ -64,8 +65,8 @@ WWW::GoKGS::Scraper::TournInfo - Information for the KGS tournament
   #         rounds => [
   #             {
   #                 round      => 1,
-  #                 start_time => '2012-10-27T16:05Z',
-  #                 end_time   => '2012-10-27T18:35Z',
+  #                 start_time => '2012-10-27T16:05',
+  #                 end_time   => '2012-10-27T18:35',
   #                 uri        => '/tournGames.jsp?id=762&round=1'
   #             },
   #             ...

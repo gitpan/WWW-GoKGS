@@ -63,45 +63,45 @@
     ],
     'rounds' => [
       {
-        'end_time' => '2005-07-10T16:45Z',
+        'end_time' => '2005-07-10T16:45',
         'round' => 1,
-        'start_time' => '2005-07-10T16:10Z',
+        'start_time' => '2005-07-10T16:10',
         'uri' => bless( do{\(my $o = 'http://www.gokgs.com/tournGames.jsp?id=104&round=1')}, 'URI::http' )
       },
       {
-        'end_time' => '2005-07-10T17:20Z',
+        'end_time' => '2005-07-10T17:20',
         'round' => 2,
-        'start_time' => '2005-07-10T16:45Z',
+        'start_time' => '2005-07-10T16:45',
         'uri' => bless( do{\(my $o = 'http://www.gokgs.com/tournGames.jsp?id=104&round=2')}, 'URI::http' )
       },
       {
-        'end_time' => '2005-07-10T17:55Z',
+        'end_time' => '2005-07-10T17:55',
         'round' => 3,
-        'start_time' => '2005-07-10T17:20Z',
+        'start_time' => '2005-07-10T17:20',
         'uri' => bless( do{\(my $o = 'http://www.gokgs.com/tournGames.jsp?id=104&round=3')}, 'URI::http' )
       },
       {
-        'end_time' => '2005-07-10T18:30Z',
+        'end_time' => '2005-07-10T18:30',
         'round' => 4,
-        'start_time' => '2005-07-10T17:55Z',
+        'start_time' => '2005-07-10T17:55',
         'uri' => bless( do{\(my $o = 'http://www.gokgs.com/tournGames.jsp?id=104&round=4')}, 'URI::http' )
       },
       {
-        'end_time' => '2005-07-10T19:05Z',
+        'end_time' => '2005-07-10T19:05',
         'round' => 5,
-        'start_time' => '2005-07-10T18:30Z',
+        'start_time' => '2005-07-10T18:30',
         'uri' => bless( do{\(my $o = 'http://www.gokgs.com/tournGames.jsp?id=104&round=5')}, 'URI::http' )
       },
       {
-        'end_time' => '2005-07-10T19:40Z',
+        'end_time' => '2005-07-10T19:40',
         'round' => 6,
-        'start_time' => '2005-07-10T19:05Z',
+        'start_time' => '2005-07-10T19:05',
         'uri' => bless( do{\(my $o = 'http://www.gokgs.com/tournGames.jsp?id=104&round=6')}, 'URI::http' )
       },
       {
-        'end_time' => '2005-07-10T20:15Z',
+        'end_time' => '2005-07-10T20:15',
         'round' => 7,
-        'start_time' => '2005-07-10T19:40Z',
+        'start_time' => '2005-07-10T19:40',
         'uri' => bless( do{\(my $o = 'http://www.gokgs.com/tournGames.jsp?id=104&round=7')}, 'URI::http' )
       }
     ]
@@ -164,5 +164,6 @@
       'gonzoBot2' => '1/1',
       'tlsBotExp1' => '0/1'
     }
-  }
+  },
+  'time_zone' => 'GMT'
 }

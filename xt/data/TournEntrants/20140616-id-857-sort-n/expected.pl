@@ -68,66 +68,67 @@
     ],
     'rounds' => [
       {
-        'end_time' => '2013-12-08T16:40Z',
+        'end_time' => '2013-12-08T16:40',
         'round' => 1,
-        'start_time' => '2013-12-08T16:00Z',
+        'start_time' => '2013-12-08T16:00',
         'uri' => bless( do{\(my $o = 'http://www.gokgs.com/tournGames.jsp?id=857&round=1')}, 'URI::http' )
       },
       {
-        'end_time' => '2013-12-08T17:20Z',
+        'end_time' => '2013-12-08T17:20',
         'round' => 2,
-        'start_time' => '2013-12-08T16:40Z',
+        'start_time' => '2013-12-08T16:40',
         'uri' => bless( do{\(my $o = 'http://www.gokgs.com/tournGames.jsp?id=857&round=2')}, 'URI::http' )
       },
       {
-        'end_time' => '2013-12-08T18:00Z',
+        'end_time' => '2013-12-08T18:00',
         'round' => 3,
-        'start_time' => '2013-12-08T17:20Z',
+        'start_time' => '2013-12-08T17:20',
         'uri' => bless( do{\(my $o = 'http://www.gokgs.com/tournGames.jsp?id=857&round=3')}, 'URI::http' )
       },
       {
-        'end_time' => '2013-12-08T18:40Z',
+        'end_time' => '2013-12-08T18:40',
         'round' => 4,
-        'start_time' => '2013-12-08T18:00Z',
+        'start_time' => '2013-12-08T18:00',
         'uri' => bless( do{\(my $o = 'http://www.gokgs.com/tournGames.jsp?id=857&round=4')}, 'URI::http' )
       },
       {
-        'end_time' => '2013-12-08T19:20Z',
+        'end_time' => '2013-12-08T19:20',
         'round' => 5,
-        'start_time' => '2013-12-08T18:40Z',
+        'start_time' => '2013-12-08T18:40',
         'uri' => bless( do{\(my $o = 'http://www.gokgs.com/tournGames.jsp?id=857&round=5')}, 'URI::http' )
       },
       {
-        'end_time' => '2013-12-08T20:00Z',
+        'end_time' => '2013-12-08T20:00',
         'round' => 6,
-        'start_time' => '2013-12-08T19:20Z',
+        'start_time' => '2013-12-08T19:20',
         'uri' => bless( do{\(my $o = 'http://www.gokgs.com/tournGames.jsp?id=857&round=6')}, 'URI::http' )
       },
       {
-        'end_time' => '2013-12-08T20:40Z',
+        'end_time' => '2013-12-08T20:40',
         'round' => 7,
-        'start_time' => '2013-12-08T20:00Z',
+        'start_time' => '2013-12-08T20:00',
         'uri' => bless( do{\(my $o = 'http://www.gokgs.com/tournGames.jsp?id=857&round=7')}, 'URI::http' )
       },
       {
-        'end_time' => '2013-12-08T21:20Z',
+        'end_time' => '2013-12-08T21:20',
         'round' => 8,
-        'start_time' => '2013-12-08T20:40Z',
+        'start_time' => '2013-12-08T20:40',
         'uri' => bless( do{\(my $o = 'http://www.gokgs.com/tournGames.jsp?id=857&round=8')}, 'URI::http' )
       },
       {
-        'end_time' => '2013-12-08T22:00Z',
+        'end_time' => '2013-12-08T22:00',
         'round' => 9,
-        'start_time' => '2013-12-08T21:20Z',
+        'start_time' => '2013-12-08T21:20',
         'uri' => bless( do{\(my $o = 'http://www.gokgs.com/tournGames.jsp?id=857&round=9')}, 'URI::http' )
       },
       {
-        'end_time' => '2013-12-08T22:40Z',
+        'end_time' => '2013-12-08T22:40',
         'round' => 10,
-        'start_time' => '2013-12-08T22:00Z',
+        'start_time' => '2013-12-08T22:00',
         'uri' => bless( do{\(my $o = 'http://www.gokgs.com/tournGames.jsp?id=857&round=10')}, 'URI::http' )
       }
     ]
   },
-  'name' => 'December 2013 KGS bot tournament'
+  'name' => 'December 2013 KGS bot tournament',
+  'time_zone' => 'GMT',
 }

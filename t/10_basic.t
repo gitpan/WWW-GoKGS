@@ -7,8 +7,8 @@ use WWW::GoKGS::Scraper::Filters qw/datetime/;
 
 subtest 'datetime()' => sub {
     my @tests = (
-        '2/13/14 12:14 AM' => '2014-02-13T00:14Z',
-        '6/9/14 12:14 PM'  => '2014-06-09T12:14Z',
+        '2/13/14 12:14 AM' => '2014-02-13T00:14',
+        '6/9/14 12:14 PM'  => '2014-06-09T12:14',
     );
 
     while ( my ($input, $expected) = splice @tests, 0, 2 ) {
@@ -20,6 +20,7 @@ subtest 'datetime()' => sub {
 subtest 'WWW::GoKGS' => sub {
     my $gokgs = WWW::GoKGS->new(
         from => 'user@example.com',
+        cookie_jar => {},
     );
 
     isa_ok $gokgs, 'WWW::GoKGS';
@@ -31,9 +32,11 @@ subtest 'WWW::GoKGS' => sub {
     isa_ok $gokgs->tourn_info, 'WWW::GoKGS::Scraper::TournInfo';
     isa_ok $gokgs->tourn_entrants, 'WWW::GoKGS::Scraper::TournEntrants';
     isa_ok $gokgs->tourn_games, 'WWW::GoKGS::Scraper::TournGames';
+    isa_ok $gokgs->tz_list, 'WWW::GoKGS::Scraper::TzList';
 
     is $gokgs->from, 'user@example.com';
     like $gokgs->agent, qr{^WWW::GoKGS/\d\.\d\d$};
+    isa_ok $gokgs->cookie_jar, 'HTTP::Cookies';
 
     can_ok $gokgs, qw(
         get

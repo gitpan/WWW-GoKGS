@@ -32,6 +32,10 @@ SYNOPSIS
       my $tourn_games_1 = $gokgs->scrape( '/tournGames.jsp?id=123&round=1' );
       my $tourn_games_2 = $gokgs->tourn_games->query( id => 123, round => 1 );
 
+      # List of time zones
+      my $tz_list_1 = $gokgs->scrape( '/tzList.jsp' );
+      my $tz_list_2 = $gokgs->tz_list->query;
+
 DESCRIPTION
     This module is a KGS Go Server ("http://www.gokgs.com/") scraper. KGS
     allows the users to play a board game called go a.k.a. baduk (Korean) or
@@ -53,6 +57,9 @@ DESCRIPTION
         Handled by WWW::GoKGS::Scraper::TournList,
         WWW::GoKGS::Scraper::TournInfo, WWW::GoKGS::Scraper::TournEntrants
         and WWW::GoKGS::Scraper::TournGames.
+
+    KGS Time Zone Selector (http://www.gokgs.com/tzList.jsp)
+        Handled by WWW::GoKGS::Scraper::TzList.
 
   ATTRIBUTES
     $UserAgent = $gokgs->user_agent
@@ -98,6 +105,9 @@ DESCRIPTION
     $TournGames = $gokgs->tourn_games
         Returns a WWW::GoKGS::Scraper::TournGames object.
 
+    $TzList = $gokgs->tz_list
+        Returns a WWW::GoKGS::Scraper::TzList object.
+
   INSTANCE METHODS
     $email_address = $gokgs->from
     $gokgs->from( 'user@example.com' )
@@ -116,6 +126,10 @@ DESCRIPTION
 
         This method is used by "scrape" method to "GET" the requested
         resource. You can override this method by subclassing.
+
+    $cookie_jar = $gokgs->cookie_jar
+    $gokgs->cookie_jar( $cookie_jar_obj )
+        Can be used to get or set a cookie jar object to use.
 
     $scraper = $gokgs->can_scrape( '/fooBar.jsp' )
     $scraper = $gokgs->can_scrape( 'http://www.gokgs.com/fooBar.jsp' )
@@ -181,6 +195,15 @@ DESCRIPTION
           my $tourn_games = $gokgs->tourn_games->scrape( $uri );
 
         See WWW::GoKGS::Scraper::TournGames for details.
+
+    $HashRef = $gokgs->scrape( '/tzList.jsp' )
+    $HashRef = $gokgs->scrape( 'http://www.gokgs.com/tzList.jsp' )
+        A shortcut for:
+
+          my $uri = URI->new( 'http://www.gokgs.com/tzList.jsp' );
+          my $tz_list = $gokgs->tz_list->scrape( $uri );
+
+        See WWW::GoKGS::Scraper::TzList for details.
 
     $scraper = $gokgs->get_scraper( $path )
         Returns a scraper object which can "scrape" a resource located at

@@ -1,5 +1,24 @@
 Revision history for Perl extension WWW::GoKGS.
 
+0.20 Jul 14th, 2014
+
+  - Add WWW::GoKGS::Scraper::TzList
+  - Add WWW::GoKGS#cookie_jar
+
+  [INCOMPATIBLE CHANGES]
+
+    Remove time zone designators from times for games, i.e.,
+    "2014-07-14T12:34Z" become "2014-07-14T12:34",
+    since we don't know which time zone is used in KGS resources exactly.
+    I mean, although KGS resources contains the abbreviated name of the time
+    zone, such as "GMT" in the game arhchives, there are no standard rules
+    to abbreviate the names. It's ambiguous. For example, "GMT" may be
+    "Greenwich Mean Time" or "Ghana Mean Time".
+
+    Fortunately, the time zone defaults to GMT (Greenwith Mean Time)
+    unless we change our cookie settings by using KGS Time Zone Selector.
+    If you want KGS resources to be stateless, do not use the selector.
+
 0.19 Jul 7th, 2014
 
   - Add WWW::GoKGS::LibXML

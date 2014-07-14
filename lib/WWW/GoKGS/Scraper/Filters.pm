@@ -17,7 +17,7 @@ sub datetime {
     $hour -= 12 if $ampm eq 'AM' and $hour == 12;
     $hour += 12 if $ampm eq 'PM' and $hour != 12;
 
-    sprintf '%04d-%02d-%02dT%02d:%02dZ',
+    sprintf '%04d-%02d-%02dT%02d:%02d',
             $year, $mon, $mday,
             $hour, $min;
 }

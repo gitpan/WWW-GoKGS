@@ -20,6 +20,7 @@ my $expected = do {
 
     hash(
         name => sub { defined },
+        time_zone => sub { $_[0] eq 'GMT' },
         round => [ integer(), sub { $_[0] >= 1 } ],
         games => array_of_hashes(
             sgf_uri => [ uri(), sub { $_[0]->path =~ /\.sgf$/ } ],
@@ -39,8 +40,8 @@ my $expected = do {
         links => hash(
             rounds => array_of_hashes(
                 round => [ integer(), sub { $_[0] >= 1 } ],
-                start_time => datetime( '%Y-%m-%dT%H:%MZ' ),
-                end_time => datetime( '%Y-%m-%dT%H:%MZ' ),
+                start_time => datetime( '%Y-%m-%dT%H:%M' ),
+                end_time => datetime( '%Y-%m-%dT%H:%M' ),
                 uri => [ uri(), sub { $_[0]->path eq '/tournGames.jsp' } ],
             ),
         ),

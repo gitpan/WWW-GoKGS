@@ -34,6 +34,7 @@ sub __build_scraper {
 
     scraper {
         process '//h1', %h1;
+        process '//a[@href="tzList.jsp"]', 'time_zone' => 'TEXT';
         process '//table[@class="grid"]//following-sibling::tr',
                 'games[]' => $game;
         process '//a[text()="Previous round"]', 'previous_round_uri' => '@href';
@@ -111,7 +112,7 @@ WWW::GoKGS::Scraper::TournGames - Games of the KGS tournament
   #                 rank => '1d',
   #             },
   #             board_size => 19,
-  #             start_time => '2012-10-27T16:05Z',
+  #             start_time => '2012-10-27T16:05',
   #             result => 'W+Resign'
   #         },
   #         ...
@@ -138,8 +139,8 @@ WWW::GoKGS::Scraper::TournGames - Games of the KGS tournament
   #         rounds => [
   #             {
   #                 round      => 1,
-  #                 start_time => '2012-10-27T16:05Z',
-  #                 end_time   => '2012-10-27T18:35Z',
+  #                 start_time => '2012-10-27T16:05',
+  #                 end_time   => '2012-10-27T18:35',
   #                 uri        => '/tournGames.jsp?id=762&round=1',
   #             },
   #             ...

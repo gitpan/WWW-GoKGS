@@ -43,6 +43,7 @@ sub __build_scraper {
     };
 
     scraper {
+        process '//a[@href="tzList.jsp"]', 'time_zone' => 'TEXT';
         process '//table[tr/th/text()="Viewable?"]//following-sibling::tr',
                 'games[]' => $game;
         process '//a[contains(@href, ".zip")]', 'zip_uri' => '@href';
@@ -199,6 +200,7 @@ Given key-value pairs of query parameters, returns a hash reference
 which represnets the result. The hashref is formatted as follows:
 
   {
+      time_zone => 'GMT',
       games => [
           {
               sgf_uri => 'http://files.gokgs.com/.../foo-bar.sgf',
@@ -218,7 +220,7 @@ which represnets the result. The hashref is formatted as follows:
               ],
               board_size => '19',
               handicap => '2',
-              start_time => '2013-07-04T05:32Z',
+              start_time => '2013-07-04T05:32',
               type => 'Ranked',
               result => 'W+Resign'
           },
