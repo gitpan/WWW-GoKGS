@@ -4,7 +4,7 @@ use warnings;
 use parent qw/WWW::GoKGS/;
 use HTML::TreeBuilder::LibXML;
 
-our $VERSION = '0.20';
+our $VERSION = '0.21';
 
 sub _tree_builder_class { 'HTML::TreeBuilder::LibXML' }
 

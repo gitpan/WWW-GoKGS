@@ -1,5 +1,16 @@
 Revision history for Perl extension WWW::GoKGS.
 
+0.21 Aug 21st, 2014
+
+  [WWW::GoKGS::Scraper::TournList]
+
+    - Add $tournament->{notes}, where $tournament denotes an element of
+      $result->{tournaments}
+
+  [WWW::GoKGS::Scraper::TournInfo]
+
+    - Add $result->{notes}
+
 0.20 Jul 14th, 2014
 
   - Add WWW::GoKGS::Scraper::TzList

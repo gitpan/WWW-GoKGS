@@ -1,5 +1,6 @@
 {
   'time_zone' => 'GMT',
+  'notes' => 'Winner: CrazyStone',
   'description' => "<p> This is the December 2013 KGS Computer Go Tournament. </p>
 <p> It is open only to Go-playing programs, known as &apos;bots&apos;. Even for bots, there are some restrictions on entry. </p>
 <p> It uses 13\x{d7}13 boards, and Chinese rules, with komi of 7\x{bd}. </p>

@@ -12,7 +12,8 @@ sub __build_scraper {
     my $links = $self->__build_tourn_links;
 
     scraper {
-        process '//h1', 'name' => [ 'TEXT', sub { s/ \([^)]+\)$// } ];
+        process '//h1', 'name' => [ 'TEXT', sub { s/\s+\([^)]+\)$// } ],
+                        'notes' => [ 'TEXT', sub { m/\s+\(([^)]+)\)$/ && $1 } ];
         process '//a[@href="tzList.jsp"]', 'time_zone' => 'TEXT';
         process '//node()[preceding-sibling::h1 and following-sibling::div]',
                 'description[]' => sub { $_[0]->as_XML };
@@ -50,6 +51,7 @@ WWW::GoKGS::Scraper::TournInfo - Information for the KGS tournament
   );
   # => {
   #     name => 'KGS Meijin Qualifier October 2012',
+  #     notes => 'Winner: foo',
   #     description => 'Welcome to the KGS Meijin October Qualifier! ...',
   #     links => {
   #         entrants => [

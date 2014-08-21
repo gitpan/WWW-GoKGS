@@ -9,19 +9,20 @@ sub base_uri { 'http://www.gokgs.com/tournList.jsp' }
 sub __build_scraper {
     my $self = shift;
 
-    my %tournament = (
-        name => 'TEXT',
-        uri => '@href',
-    );
-
     my %year_index = (
         year => 'TEXT',
         uri  => '@href',
     );
 
+    my $tournament = scraper {
+        process '.', 'name' => [ 'TEXT', sub { s/\s+\([^)]+\)$// } ],
+                     'notes' => [ 'TEXT', sub { m/\s+\(([^)]+)\)$/ && $1 } ];
+        process 'a', 'uri' => '@href';
+    };
+
     scraper {
-        process '//a[starts-with(@href, "tournInfo.jsp")]',
-                'tournaments[]' => \%tournament;
+        process '//p[a[starts-with(@href,"tournInfo.jsp")]]',
+                'tournaments[]' => $tournament;
         process '//a[starts-with(@href, "tournList.jsp")]',
                 'year_index[]' => \%year_index;
         process '//p[preceding-sibling::h2/text()="Year Index"]',
@@ -73,14 +74,15 @@ WWW::GoKGS::Scraper::TournList - List of KGS tournaments
   #         ...
   #         {
   #             name => 'KGS Meijin Qualifier October 2012',
-  #             uri  => '/tournInfo.jsp?id=762',
+  #             notes => 'Winner: foo',
+  #             uri  => '/tournInfo.jsp?id=762'
   #         },
   #         ...
   #     ],
   #     year_index => [
   #         {
   #             year => 2001,
-  #             uri  => '/tournList.jsp?year=2001',
+  #             uri  => '/tournList.jsp?year=2001'
   #         },
   #         ...
   #     ]

@@ -54,11 +54,11 @@
    "provides" : {
       "WWW::GoKGS" : {
          "file" : "lib/WWW/GoKGS.pm",
-         "version" : "0.20"
+         "version" : "0.21"
       },
       "WWW::GoKGS::LibXML" : {
          "file" : "lib/WWW/GoKGS/LibXML.pm",
-         "version" : "0.20"
+         "version" : "0.21"
       },
       "WWW::GoKGS::Scraper" : {
          "file" : "lib/WWW/GoKGS/Scraper.pm"
@@ -103,5 +103,5 @@
          "url" : "git://github.com/anazawa/p5-WWW-GoKGS.git"
       }
    },
-   "version" : "0.20"
+   "version" : "0.21"
 }

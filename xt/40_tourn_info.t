@@ -14,6 +14,7 @@ my $gokgs = build_gokgs();
 
 my $expected = hash(
     name => sub { defined },
+    notes => sub { defined },
     time_zone => sub { $_[0] eq 'GMT' },
     description => sub { defined },
     links => hash(

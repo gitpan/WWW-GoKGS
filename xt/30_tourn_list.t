@@ -15,6 +15,7 @@ my $gokgs = build_gokgs();
 my $expected = hash(
     tournaments => array_of_hashes(
         name => sub { defined },
+        notes => sub { defined },
         uri => [ uri(), sub { $_[0]->path eq '/tournInfo.jsp' } ],
     ),
     year_index => array_of_hashes(
